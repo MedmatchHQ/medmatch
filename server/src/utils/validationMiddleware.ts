@@ -11,6 +11,7 @@ import {
 } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
+import { FileValidator } from "@/modules/files";
 
 /** Represents a constructor for a class */
 type ClassType<T> = { new (...args: any[]): T };
@@ -99,25 +100,25 @@ const formattedValidationResult = validationResult.withDefaults({
  * Formats the class validation errors to the custom `IValidationError` type.
  */
 function formatClassErrors(
-  classErrors: ClassValidationError[],
+  classErrors: ClassValidationError[]
 ): IValidationError[] {
   // use flatMap to handle nested errors
   return classErrors.flatMap((error) =>
-      // If there are no children, add the error
-      error.children === undefined || error.children.length === 0
-        // Map the constraints to a list of validation errors
-        ? Object.values(error.constraints ?? {}).map(
-            (msg) =>
-              ({
-                type: "validation",
-                loc: "body",
-                field: error.property,
-                details: msg,
-              } as IValidationError)
-          )
-        // If there are children, recursively add the children
-        : formatClassErrors(error.children)
-    )
+    // If there are no children, add the error
+    error.children === undefined || error.children.length === 0
+      ? // Map the constraints to a list of validation errors
+        Object.values(error.constraints ?? {}).map(
+          (msg) =>
+            ({
+              type: "validation",
+              loc: error.target instanceof FileValidator ? "file" : "body",
+              field: error.property,
+              details: msg,
+            } as IValidationError)
+        )
+      : // If there are children, recursively add the children
+        formatClassErrors(error.children)
+  );
 }
 
 /**
@@ -126,7 +127,9 @@ function formatClassErrors(
  */
 function endValidation(req: Request, res: Response, next: NextFunction): any {
   const expressValidatorErrors = formattedValidationResult(req).array();
-  const classValidatorErrors = formatClassErrors(res.locals.classValidatorErrors ?? [])
+  const classValidatorErrors = formatClassErrors(
+    res.locals.classValidatorErrors ?? []
+  );
   const errors = [...expressValidatorErrors, ...classValidatorErrors];
   if (errors.length > 0) {
     return res.status(400).json({

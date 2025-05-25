@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { GeneralCode, HttpError } from "@/types/errors";
 import dotenv from "dotenv";
+import { MulterError } from "multer";
+import { stat } from "fs";
 dotenv.config();
 
 // This function needs the unused "next" parameter to be included in order to work properly
@@ -27,6 +29,18 @@ const errorHandler = (
           type: error.type,
           details: error.message,
           code: error.code,
+        },
+      ],
+    });
+  } else if (error instanceof MulterError) {
+    return res.status(400).json({
+      status: "error",
+      errors: [
+        {
+          type: "validation",
+          loc: "file",
+          field: error.field,
+          details: error.message,
         },
       ],
     });

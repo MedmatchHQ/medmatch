@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import request from "supertest";
 import { app } from "@/server";
+import { expectMatch } from "./validation";
+import { HttpErrorBodyValidator } from "./response.validator";
 
 function getAuthenticatedAgent() {
   const token = jwt.sign(
@@ -12,10 +14,29 @@ function getAuthenticatedAgent() {
     { expiresIn: "1h" }
   );
 
-  const agent = request.agent(app) ;
+  const agent = request.agent(app);
   agent.auth(token, { type: "bearer" });
 
   return agent;
 }
 
-export { getAuthenticatedAgent };
+async function itShouldAuthenticateClient(
+  endpoint: string,
+  method: "get" | "post" | "patch" | "put" | "delete"
+) {
+  const response = await request(app)[method](endpoint);
+  expect(response.status).toBe(401);
+  expect(response.headers["content-type"]).toBe(
+    "application/json; charset=utf-8"
+  );
+  expectMatch(HttpErrorBodyValidator, response.body);
+  expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+  const [error] = response.body.errors;
+  expect(error.type).toEqual("http");
+  expect(error.code).toEqual("UNAUTHORIZED");
+}
+
+export {
+  getAuthenticatedAgent,
+  itShouldAuthenticateClient,
+};
