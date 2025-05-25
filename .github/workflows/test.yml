@@ -11,8 +11,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    # env:
-    #   ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+    env:
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
