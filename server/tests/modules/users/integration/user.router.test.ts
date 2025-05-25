@@ -1,4 +1,8 @@
-import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
+import {
+  expectEndpointToRequireAuth,
+  getAuthenticatedAgent,
+  HTTPMethod,
+} from "#/utils/mockAuthentication";
 import TestAgent from "supertest/lib/agent";
 import { createTestUser, defaultUserData } from "../utils/user.helpers";
 import { TestUserValidator } from "../utils/user.validators";
@@ -8,15 +12,27 @@ import {
 } from "#/utils/helpers";
 import { InputUser, User, UserCode, UserModel } from "@/modules/users";
 import { FileCode, FileModel } from "@/modules/files";
-import { expectMatch } from "#/utils/validation";
-import { HttpErrorBodyValidator } from "#/utils/response.validator";
 import { ObjectId } from "mongodb";
 
-describe("User Router Integration", () => {
+describe("User Router", () => {
   let agent: TestAgent;
 
   beforeAll(() => {
     agent = getAuthenticatedAgent();
+  });
+
+  describe("endpoint authentication", () => {
+    test.each<[HTTPMethod, string]>([
+      ["get", "/api/users"],
+      ["get", "/api/users/:id"],
+      ["post", "/api/users"],
+      ["patch", "/api/users/:id"],
+      ["delete", "/api/users/:id"],
+      ["post", "/api/users/:id/files"],
+      ["delete", "/api/users/:userId/files/:fileId"],
+    ])("`%s %s` should require authentication", async (method, endpoint) => {
+      await expectEndpointToRequireAuth(method, endpoint);
+    });
   });
 
   describe("GET /", () => {
@@ -106,7 +122,6 @@ describe("User Router Integration", () => {
 
       const response = await agent.post("/api/users").send(userData);
 
-      
       const user = await UserModel.findById(response.body.data.id);
       expect(user).toBeDefined();
       expect(user!.password).not.toBe(userData.password);
@@ -176,9 +191,7 @@ describe("User Router Integration", () => {
       const user = await createTestUser();
       const updateData: Partial<InputUser> = { password: "newpassword" };
 
-      await agent
-        .patch(`/api/users/${user.id}`)
-        .send(updateData);
+      await agent.patch(`/api/users/${user.id}`).send(updateData);
 
       const updatedUser = await UserModel.findById(user.id);
       expect(updatedUser).toBeDefined();

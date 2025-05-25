@@ -55,11 +55,11 @@ function expectIdValidationError(
 /**
  * Helper function that checks if the response contains validation errors that match the invalid fields.
  * @param response The response to check.
- * @param invalidFields The list of invalid fields. Specifically the ones that appear in the `field` property of each validation error.
+ * @param expectedFields The list of expected invalid fields. Specifically the ones that appear in the `field` property of each validation error.
  */
 function expectValidationErrors(
   response: Response,
-  invalidFields: string[],
+  expectedFields: string[],
   loc: string = "body"
 ) {
   expect(response.status).toBe(400);
@@ -70,11 +70,15 @@ function expectValidationErrors(
 
   const errors: IValidationError[] = response.body.errors;
   expectMatch(response.body, ValidationErrorBodyValidator);
-  expect(errors.length).toBeGreaterThanOrEqual(invalidFields.length);
-  expect(errors.every((e) => e.loc === loc)).toBeTruthy();
+  expect(errors.length).toBeGreaterThanOrEqual(expectedFields.length);
+  errors.forEach((error) => {
+    expect(error.loc).toBe(loc);
+  });
 
-  const errorFields = errors.map((e) => e.field);
-  expect(invalidFields.every((k) => errorFields.includes(k)));
+  const actualFields = errors.map((e) => e.field);
+  expectedFields.forEach((expectedField) => {
+    expect(actualFields).toContain(expectedField);
+  });
 }
 
 export { expectMatch, expectIdValidationError, expectValidationErrors };

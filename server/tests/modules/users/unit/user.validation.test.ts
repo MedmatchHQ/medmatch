@@ -1,14 +1,11 @@
 import {
   expectIdValidationError,
-  expectMatch,
   expectValidationErrors,
 } from "#/utils/validation";
-import { SuccessBodyValidator } from "#/utils/response.validator";
 import {
   createTestUser,
   defaultUserData,
 } from "#/modules/users/utils/user.helpers";
-import { TestUserValidator } from "#/modules/users/utils/user.validators";
 import TestAgent from "supertest/lib/agent";
 import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
 import { Types } from "mongoose";
@@ -28,58 +25,70 @@ describe("User Validation", () => {
   });
 
   describe("POST /", () => {
-    it("should return a validation error for invalid email", async () => {
-      const userData = await defaultUserData();
-      userData.email = "invalid email";
-
-      const response = await agent.post("/api/users").send(userData);
-
-      expectValidationErrors(response, ["email"]);
-    });
-
-    it("should return a validation error for incorrect data types in user", async () => {
-      const invalidData = {
-        first: 1,
-        last: 2,
-        email: 3,
-        password: 4,
-        isEmployer: 5,
-        profile: 6,
-      };
-
-      const response = await agent.post("/api/users").send(invalidData);
-
-      expectValidationErrors(response, Object.keys(invalidData));
-    });
-
-    it("should return a validation error for incorrect data types in profile", async () => {
-      const user: any = await defaultUserData();
-      const { profile, ...invalidData } = user;
-      invalidData.profile = {
-        bio: 1,
-        work: 2,
-        research: 3,
-        volunteering: 4,
-      };
-
-      const response = await agent.post("/api/users").send(invalidData);
-
-      expectValidationErrors(response, Object.keys(invalidData.profile));
-    });
-
-    it("should return a validation error for empty strings in user", async () => {
-      const invalidData = {
-        first: "",
-        last: "",
-        email: "",
-        password: "",
-        isEmployer: true,
-      };
-
-      const response = await agent.post("/api/users").send(invalidData);
-
-      expectValidationErrors(response, Object.keys(invalidData));
-    });
+    test.each([
+      {
+        name: "invalid email format",
+        getData: async () => {
+          const userData = await defaultUserData();
+          userData.email = "invalid email";
+          return userData;
+        },
+        expectedFields: ["email"],
+      },
+      {
+        name: "incorrect data types in user",
+        getData: async () => ({
+          first: 1,
+          last: 2,
+          email: 3,
+          password: 4,
+          isEmployer: 5,
+          profile: 6,
+        }),
+        expectedFields: [
+          "first",
+          "last",
+          "email",
+          "password",
+          "isEmployer",
+          "profile",
+        ],
+      },
+      {
+        name: "incorrect data types in profile",
+        getData: async () => {
+          const user = await defaultUserData();
+          return {
+            ...user,
+            profile: {
+              bio: 1,
+              work: 2,
+              research: 3,
+              volunteering: 4,
+            },
+          };
+        },
+        expectedFields: ["bio", "work", "research", "volunteering"],
+      },
+      {
+        name: "empty strings in user",
+        getData: async () => ({
+          first: "",
+          last: "",
+          email: "",
+          password: "",
+          isEmployer: true,
+        }),
+        expectedFields: ["first", "last", "email", "password"],
+      },
+    ])(
+      "should return validation error for $name",
+      async ({ getData, expectedFields }) => {
+        const requestData = await getData();
+        const response = await agent.post("/api/users").send(requestData);
+        expectValidationErrors(response, expectedFields);
+      }
+    );
   });
 
   describe("PATCH /:id", () => {
@@ -88,75 +97,70 @@ describe("User Validation", () => {
       expectIdValidationError(response);
     });
 
-    it("should return a validation error if a null profile field in included in the body", async () => {
-      const user = await createTestUser();
-      const response = await agent
-        .patch(`/api/users/${user.id}`)
-        .send({ profile: null });
-
-      expectValidationErrors(response, ["profile"]);
-    });
-
-    it("should throw a validation error if there is an attempt to edit the files array", async () => {
-      const user = await createTestUser();
-      const response = await agent
-        .patch(`/api/users/${user.id}`)
-        .send({ profile: { files: [] } });
-
-      expectValidationErrors(response, ["profile.files"]);
-    });
-
-    it("should return a validation error for incorrect data types in user", async () => {
-      const user = await createTestUser();
-      const invalidData = {
-        first: 1,
-        last: 2,
-        email: 3,
-        password: 4,
-        isEmployer: 5,
-        profile: 6,
-      };
-
-      const response = await agent
-        .patch(`/api/users/${user.id}`)
-        .send(invalidData);
-
-      expectValidationErrors(response, Object.keys(invalidData));
-    });
-
-    it("should return a validation error for incorrect data types in profile", async () => {
-      const user = await createTestUser();
-
-      const invalidProfile = {
-        bio: 1,
-        work: 2,
-        research: 3,
-        volunteering: 4,
-      };
-
-      const response = await agent
-        .patch(`/api/users/${user.id}`)
-        .send({ profile: invalidProfile });
-
-      expectValidationErrors(response, Object.keys(invalidProfile));
-    });
-
-    it("should return a validation error for empty strings in user", async () => {
-      const user = await createTestUser();
-
-      const invalidData = {
-        first: "",
-        last: "",
-        email: "",
-        password: "",
-      };
-
-      const response = await agent
-        .patch(`/api/users/${user.id}`)
-        .send(invalidData);
-
-      expectValidationErrors(response, Object.keys(invalidData));
-    });
+    test.each([
+      {
+        name: "null profile field in body",
+        getData: () => ({ profile: null }),
+        expectedFields: ["profile"],
+      },
+      {
+        name: "attempt to edit files array",
+        getData: () => ({
+          profile: { files: [] },
+        }),
+        expectedFields: ["profile.files"],
+      },
+      {
+        name: "invalid email format",
+        getData: () => ({
+          email: "invalid email",
+        }),
+        expectedFields: ["email"],
+      },
+      {
+        name: "incorrect data types in user",
+        getData: () => ({
+          first: 1,
+          last: 2,
+          email: 3,
+          password: 4,
+          isEmployer: 5,
+        }),
+        expectedFields: ["first", "last", "email", "password", "isEmployer"],
+      },
+      {
+        name: "incorrect data types in profile",
+        getData: () => ({
+          profile: {
+            bio: 1,
+            work: 2,
+            research: 3,
+            volunteering: 4,
+          },
+        }),
+        expectedFields: ["bio", "work", "research", "volunteering"],
+      },
+      {
+        name: "empty strings in user",
+        getData: () => ({
+          first: "",
+          last: "",
+          email: "",
+          password: "",
+        }),
+        expectedFields: ["first", "last", "email", "password"],
+      },
+    ])(
+      "should return validation error for $name",
+      async ({ getData, expectedFields }) => {
+        const user = await createTestUser();
+        const requestData = getData();
+        const response = await agent
+          .patch(`/api/users/${user.id}`)
+          .send(requestData);
+        expectValidationErrors(response, expectedFields);
+      }
+    );
   });
 
   describe("DELETE /:id", () => {

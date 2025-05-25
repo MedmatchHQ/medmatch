@@ -19,7 +19,7 @@ class SuccessBodyValidator {
   @IsNotEmpty()
   message!: string;
 
-  static withData<T>(classType: ClassType<T>) {
+  static withData<T extends object>(classType: ClassType<T>) {
     class BodyWithData extends SuccessBodyValidator {
       @ValidateNested()
       @Type(() => classType)
@@ -28,7 +28,7 @@ class SuccessBodyValidator {
     return BodyWithData;
   }
 
-  static withArrayData<T>(classType: ClassType<T>) {
+  static withArrayData<T extends object>(classType: ClassType<T>) {
     class BodyWithArrayData extends SuccessBodyValidator {
       @IsArray()
       @ValidateNested({ each: true })

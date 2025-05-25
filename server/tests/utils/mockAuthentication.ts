@@ -3,7 +3,12 @@ import request from "supertest";
 import { app } from "@/server";
 import { expectMatch } from "./validation";
 import { HttpErrorBodyValidator } from "./response.validator";
+import { HTTPMethod } from "#/types/HttpMethod";
 
+/**
+ * Creates an agent that passes auth middleware checks.
+ * Sends a bearer JWT token in the Authorization header.
+ */
 function getAuthenticatedAgent() {
   const token = jwt.sign(
     {
@@ -20,9 +25,14 @@ function getAuthenticatedAgent() {
   return agent;
 }
 
-async function itShouldAuthenticateClient(
-  endpoint: string,
-  method: "get" | "post" | "patch" | "put" | "delete"
+/**
+ * Tests for a 401 Unauthorized response on a request from an unauthenticated client.
+ * @param endpoint The endpoint to test.
+ * @param method The HTTP method to use for the request.
+ */
+async function expectEndpointToRequireAuth(
+  method: HTTPMethod,
+  endpoint: string
 ) {
   const response = await request(app)[method](endpoint);
   expect(response.status).toBe(401);
@@ -30,13 +40,10 @@ async function itShouldAuthenticateClient(
     "application/json; charset=utf-8"
   );
   expectMatch(HttpErrorBodyValidator, response.body);
-  expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+  expect(response.body.errors.length).toBe(1);
   const [error] = response.body.errors;
   expect(error.type).toEqual("http");
   expect(error.code).toEqual("UNAUTHORIZED");
 }
 
-export {
-  getAuthenticatedAgent,
-  itShouldAuthenticateClient,
-};
+export { getAuthenticatedAgent, expectEndpointToRequireAuth, type HTTPMethod };
