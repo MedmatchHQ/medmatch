@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { GeneralCode, HttpError } from "@/types/errors";
 import dotenv from "dotenv";
 import { MulterError } from "multer";
-import { stat } from "fs";
 dotenv.config();
 
 // This function needs the unused "next" parameter to be included in order to work properly
@@ -15,6 +14,7 @@ const errorHandler = (
   if (process.env.NODE_ENV === "development") {
     console.error("Received by error handler:\n", error);
   }
+  console.log("error:", error);
 
   if (res === undefined) {
     console.error("Response object is undefined in errorHandler");

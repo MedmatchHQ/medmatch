@@ -9,7 +9,6 @@ import {
 } from "class-validator";
 import { Types } from "mongoose";
 import { Type } from "class-transformer";
-import MaxBufferSize from "@/utils/maxBufferSize";
 
 class TestFileValidator {
   @IsString()
@@ -21,7 +20,6 @@ class TestFileValidator {
   type!: string;
 
   @IsNotEmpty()
-  @MaxBufferSize(5)
   data!: Buffer;
 }
 

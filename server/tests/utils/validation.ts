@@ -2,10 +2,9 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import mongoose from "mongoose";
 import { ValidationErrorBodyValidator } from "#/utils/response.validator";
-import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
-import TestAgent from "supertest/lib/agent";
 import { Response } from "supertest";
 import { IValidationError } from "@/types/errors";
+import { formatClassErrors } from "@/utils/validationMiddleware";
 
 type ClassType<T> = { new (...args: any[]): T };
 
@@ -26,7 +25,7 @@ async function expectMatch<T extends object>(
   const instance = plainToInstance(classType, plainObj);
   const errors = await validate(instance);
   if (errors.length > 0) {
-    console.error("Validation errors:", errors);
+    console.error("Validation errors:", formatClassErrors(errors));
   }
   expect(errors.length).toBe(0);
 }

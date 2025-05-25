@@ -90,8 +90,8 @@ describe("User Controller", () => {
     it("should update an existing user", async () => {
       const mockUser = await createTestUser();
       req.params.id = mockUser.id.toString();
-      req.body = { name: "Updated Name" };
-      const updatedUser = { ...mockUser, name: "Updated Name" };
+      req.body = { first: "Updated Name" };
+      const updatedUser = { ...mockUser, first: "Updated Name" };
       userService.updateUser.mockResolvedValue(updatedUser);
 
       await userController.updateUser(req, res);

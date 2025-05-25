@@ -1,14 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import {
-  param,
-  Result,
-  validationResult,
-  ValidationError,
-  Meta,
-  FieldValidationError,
-} from "express-validator";
+import { param, validationResult } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
 import { FileValidator } from "@/modules/files";
@@ -158,4 +151,5 @@ export {
   validatePartialBody,
   validateId,
   validateFile,
+  formatClassErrors,
 };

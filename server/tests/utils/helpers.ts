@@ -3,24 +3,36 @@ import { expectMatch } from "#/utils/validation";
 import { SuccessBodyValidator } from "./response.validator";
 import { ClassType } from "@/types/validation";
 
-function expectSuccessResponse<T, K extends ClassType<T>>(
+async function expectSuccessResponse<T, K extends ClassType<T>>(
   response: Response,
   dataValidator: K | [K],
-  data: any
+  data?: any,
+  overrides?: {
+    status?: number;
+    contentHeader?: string;
+  }
 ) {
-  expect(response.status).toBe(200);
-  expect(response.headers["content-type"]).toBe(
-    "application/json; charset=utf-8"
-  );
+  const { status = 200, contentHeader = "application/json; charset=utf-8" } =
+    overrides || {};
+
+  expect(response.status).toBe(status);
+  expect(response.headers["content-type"]).toBe(contentHeader);
+
   if (Array.isArray(dataValidator)) {
-    expectMatch(
+    await expectMatch(
       SuccessBodyValidator.withArrayData<T>(dataValidator[0]),
       response.body
     );
   } else {
-    expectMatch(SuccessBodyValidator.withData<T>(dataValidator), response.body);
+    await expectMatch(
+      SuccessBodyValidator.withData<T>(dataValidator),
+      response.body
+    );
   }
-  expect(response.body.data).to(data);
+  if (data !== undefined) {
+    const rawData = JSON.parse(JSON.stringify(data));
+    expect(response.body.data).toMatchObject<K>(rawData);
+  }
 }
 
 export { expectSuccessResponse };
