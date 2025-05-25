@@ -2,9 +2,15 @@ import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
 import TestAgent from "supertest/lib/agent";
 import { createTestUser, defaultUserData } from "../utils/user.helpers";
 import { TestUserValidator } from "../utils/user.validators";
-import { expectSuccessResponse } from "#/utils/helpers";
-import { InputUser, User, UserModel } from "@/modules/users";
-import { FileModel } from "@/modules/files";
+import {
+  expectHttpErrorResponse,
+  expectSuccessResponse,
+} from "#/utils/helpers";
+import { InputUser, User, UserCode, UserModel } from "@/modules/users";
+import { FileCode, FileModel } from "@/modules/files";
+import { expectMatch } from "#/utils/validation";
+import { HttpErrorBodyValidator } from "#/utils/response.validator";
+import { ObjectId } from "mongodb";
 
 describe("User Router Integration", () => {
   let agent: TestAgent;
@@ -17,7 +23,7 @@ describe("User Router Integration", () => {
     it("should return an empty list when there are no users", async () => {
       const response = await agent.get("/api/users");
 
-      await expectSuccessResponse(response, Object);
+      await expectSuccessResponse(response);
     });
 
     it("should return all users", async () => {
@@ -36,6 +42,23 @@ describe("User Router Integration", () => {
       const response = await agent.get(`/api/users/${user.id}`);
 
       await expectSuccessResponse(response, TestUserValidator, user);
+    });
+
+    it("should return an error for user not found", async () => {
+      await createTestUser();
+      const badId = new ObjectId();
+
+      const response = await agent.get(`/api/users/${badId}`);
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: UserCode.UserNotFound,
+          },
+        ],
+      });
     });
   });
 
@@ -56,6 +79,39 @@ describe("User Router Integration", () => {
         }
       );
     });
+
+    it("should return an error for duplicate email", async () => {
+      const user = await createTestUser();
+      const newData = await defaultUserData();
+      const duplicateEmailData = {
+        ...newData,
+        email: user.email.toUpperCase(),
+      };
+
+      const response = await agent.post("/api/users").send(duplicateEmailData);
+
+      await expectHttpErrorResponse(response, {
+        status: 409,
+        errors: [
+          {
+            details: expect.stringContaining(user.email.toUpperCase()),
+            code: UserCode.UserConflict,
+          },
+        ],
+      });
+    });
+
+    it("should hash the password", async () => {
+      const userData = await defaultUserData();
+
+      const response = await agent.post("/api/users").send(userData);
+
+      
+      const user = await UserModel.findById(response.body.data.id);
+      expect(user).toBeDefined();
+      expect(user!.password).not.toBe(userData.password);
+      expect(user!.password).toBeDefined();
+    });
   });
 
   describe("PATCH /:id", () => {
@@ -74,6 +130,62 @@ describe("User Router Integration", () => {
       const users = await UserModel.find();
       expect(users.length).toBe(1);
     });
+
+    it("should return an error for user not found", async () => {
+      const badId = new ObjectId();
+      const updateData: Partial<InputUser> = { first: "Updated Name" };
+
+      const response = await agent
+        .patch(`/api/users/${badId}`)
+        .send(updateData);
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: UserCode.UserNotFound,
+          },
+        ],
+      });
+    });
+
+    it("should return an error for a duplicate email", async () => {
+      const user1 = await createTestUser();
+      const user2 = await createTestUser();
+      const updateData: Partial<InputUser> = {
+        email: user2.email.toUpperCase(),
+      };
+
+      const response = await agent
+        .patch(`/api/users/${user1.id}`)
+        .send(updateData);
+
+      await expectHttpErrorResponse(response, {
+        status: 409,
+        errors: [
+          {
+            details: expect.stringContaining(user2.email.toUpperCase()),
+            code: UserCode.UserConflict,
+          },
+        ],
+      });
+    });
+
+    it("should hash the password if provided", async () => {
+      const user = await createTestUser();
+      const updateData: Partial<InputUser> = { password: "newpassword" };
+
+      await agent
+        .patch(`/api/users/${user.id}`)
+        .send(updateData);
+
+      const updatedUser = await UserModel.findById(user.id);
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser!.password).not.toBe(user.password);
+      expect(updatedUser!.password).not.toBe(updateData.password);
+      expect(updatedUser!.password).toBeDefined();
+    });
   });
 
   describe("DELETE /:id", () => {
@@ -87,6 +199,23 @@ describe("User Router Integration", () => {
       const users = await UserModel.find();
       expect(users.length).toBe(1);
       expect(users[0].id).toBe(user2.id);
+    });
+
+    it("should return an error for user not found", async () => {
+      await createTestUser();
+      const badId = new ObjectId();
+
+      const response = await agent.delete(`/api/users/${badId}`);
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: UserCode.UserNotFound,
+          },
+        ],
+      });
     });
   });
 
@@ -105,21 +234,40 @@ describe("User Router Integration", () => {
       await expectSuccessResponse(response, TestUserValidator);
 
       const files = await FileModel.find();
-      console.log(
-        "files",
-        files.map((file) => file.name)
-      );
       expect(files.length).toBe(2);
 
       const updatedUser = await UserModel.findById(user.id).populate(
         "profile.files"
       );
       expect(updatedUser).toBeDefined();
+
       const userFiles = updatedUser!.profile.files;
       expect(userFiles.length).toBe(2);
       expect(userFiles.some((file) => file.name === "test_file.png")).toBe(
         true
       );
+    });
+
+    it("should return an error for user not found", async () => {
+      const badId = new ObjectId();
+      const fileData = Buffer.alloc(1024 * 1024);
+
+      const response = await agent
+        .post(`/api/users/${badId}/files`)
+        .attach("file", fileData, {
+          filename: "test_file.png",
+          contentType: "image/png",
+        });
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: UserCode.UserNotFound,
+          },
+        ],
+      });
     });
   });
 
@@ -140,6 +288,45 @@ describe("User Router Integration", () => {
       expect(updatedUser).toBeDefined();
       const userFiles = updatedUser!.profile.files;
       expect(userFiles.length).toBe(0);
+    });
+
+    it("should return an error for user not found", async () => {
+      const user = await createTestUser();
+      const badId = new ObjectId();
+      const fileId = user.profile.files[0].id;
+
+      const response = await agent.delete(
+        `/api/users/${badId}/files/${fileId}`
+      );
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: UserCode.UserNotFound,
+          },
+        ],
+      });
+    });
+
+    it("should return an error for file not found", async () => {
+      const user = await createTestUser();
+      const badId = new ObjectId();
+
+      const response = await agent.delete(
+        `/api/users/${user.id}/files/${badId}`
+      );
+
+      await expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: FileCode.FileNotFound,
+          },
+        ],
+      });
     });
   });
 });

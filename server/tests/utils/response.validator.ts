@@ -75,7 +75,7 @@ class HttpErrorBodyValidator {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => HttpErrorBodyValidator)
+  @Type(() => HttpErrorValidator)
   errors!: HttpErrorValidator[];
 }
 

@@ -14,7 +14,6 @@ const errorHandler = (
   if (process.env.NODE_ENV === "development") {
     console.error("Received by error handler:\n", error);
   }
-  console.log("error:", error);
 
   if (res === undefined) {
     console.error("Response object is undefined in errorHandler");
