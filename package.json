@@ -1,0 +1,22 @@
+{
+  "name": "medmatch",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -n client,server -c blue,green \"npm run dev --prefix client\" \"npm run dev --prefix server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naasanov/medmatch.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/naasanov/medmatch/issues"
+  },
+  "homepage": "https://github.com/naasanov/medmatch#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

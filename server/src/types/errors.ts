@@ -1,5 +1,18 @@
-import { GeneralCode, ErrorCode } from "@/types/errorCodes";
+import { ErrorCode } from "@/types/errorCodes";
 import { Location } from "express-validator";
+
+enum MongooseCode {
+  DuplicateKey = 11000,
+}
+
+enum GeneralCode {
+  NotFound = "NOT_FOUND",
+  Unauthorized = "UNAUTHORIZED",
+  Forbidden = "FORBIDDEN",
+  BadRequest = "BAD_REQUEST",
+  InternalServerError = "INTERNAL_SERVER_ERROR",
+  Conflict = "CONFLICT",
+}
 
 // Discriminated type union to enable efficient type assertion
 interface IApiError {
@@ -69,4 +82,6 @@ export {
   IApiError,
   IHttpError,
   IValidationError,
+  GeneralCode,
+  MongooseCode,
 };

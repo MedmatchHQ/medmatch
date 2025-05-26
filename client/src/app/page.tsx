@@ -1,6 +1,5 @@
 import graphic from "@/assets/homepage-graphic.png";
-import play from "@/assets/play.svg";
-import Link from "next/link";
+import { Play } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -11,26 +10,12 @@ export default function Home() {
         <header className="text-6xl font-bold text-accentDarkBlue font-sans">
           Welcome to MedMatch
         </header>
-        <p className="text-xl font-semibold my-5">
-          An all-in-one platform that helps pre-med students gain industry
-          experience, make valuable connections, and obtain the resources they
-          need to succeed in their career
+        <p className="text-xl font-semibold my-5 text-body-text leading-8">
+        An all-in-one platform that helps premed students gain industry experience, make valuable connections, and obtain the resources they need to succeed in their career
         </p>
-        <Button>
-          <Image
-            src={play}
-            alt="play button"
-            width={24}
-            height={24}
-            className="h-4 w-auto mr-1"
-          />
+        <Button className="w-60 h-12 text-lg font-semibold bg-primary-purple hover:bg-[#ffffff] hover:text-primary-purple hover:outline hover:outline-primary-purple hover:outline-[2]">
+          <Play/>
           <span>Watch a Run Through</span>
-        </Button>
-        <Button>
-          <Link href="/login">Login</Link>
-        </Button>
-        <Button>
-          <Link href="/signup">Signup</Link>
         </Button>
       </section>
       <Image

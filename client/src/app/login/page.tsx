@@ -1,88 +1,133 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import Image from "next/image";
+import google from "@/assets/google-icon.png";
+import linkedin from "@/assets/linkedin-icon.png";
 
-function Login() {
-  const emailRef = useRef<HTMLInputElement>(null);
+const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  remember: z.boolean(),
+});
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errMsg, setErrMsg] = useState("");
-  const [success, setSuccess] = useState(false);
+type LoginFormValues = z.infer<typeof formSchema>;
 
-  useEffect(() => {
-    emailRef.current?.focus();
-  }, []);
+export default function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    setErrMsg("");
-  }, [email, password]);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-  }
+  const onSubmit = (values: LoginFormValues) => console.log(values);
 
-  const inputStyle = "py-2 pl-4 w-full border-2 border-[#a8a8a8] rounded-2xl";
   return (
-    <>
-      {success ? (
-        <div>
-          <h1>You are logged in!</h1>
-          <Link href="/profile">go to profile</Link>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-screen w-1/4 mx-auto">
-          <p>{errMsg}</p>
-          <div>
-            <p className="text-7xl font-semibold mb-3">Login to </p>
-            <p className="text-7xl font-semibold mb-3">Medmatch </p>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#B1D2F6] to-[#DFEDFB]">
+      <div className="relative bg-white bg-opacity-60 shadow-md rounded-xl p-6 w-full max-w-3xl overflow-hidden">
+        <div className="absolute inset-0 backdrop-blur-md z-10"></div>
+        <div className="relative z-20 space-y-6">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-800">Login</h2>
+            <p className="mt-4 text-xs text-gray-500">Enter your email and password below</p>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col items-center gap-4 w-full"
-          >
-            {/* Placeholder for google and linkedin logins */}
-            <input
-              className={inputStyle}
-              type="text"
-              placeholder="Login with Google"
-            />
-            <input
-              className={inputStyle}
-              type="text"
-              placeholder="Login with Linkedin"
-            />
-
-            {/* should be corrected to conventions for username */}
-            {/* <label htmlFor='email'>Email:</label> */}
-            <input
-              className={inputStyle}
-              type="text"
-              id="email"
-              placeholder="Username"
-              ref={emailRef}
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              required
-            />
-            {/* <label htmlFor='password'>Password:</label> */}
-            <input
-              className={inputStyle}
-              type="password"
-              id="password"
-              placeholder="Enter email"
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              required
-            />
-            <br />
-
-            <button>Sign In</button>
-          </form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="email" {...field} className="bg-white rounded-lg" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <Input type={showPassword ? "text" : "password"} placeholder="password" {...field} 
+                          className="bg-white rounded-lg" 
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} 
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 text-xs" >
+                          {showPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={form.control}
+                  name="remember"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2">
+                      <FormControl>
+                        <Checkbox {...field} value={field.value ? "true" : "false"} />
+                      </FormControl>
+                      <FormLabel className="text-xs font-normal pb-2">Remember me</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <Link href="#" className="text-xs text-gray-500 hover:text-blue-500">
+                  Forgot password?
+                </Link>
+              </div>
+              <Button type="submit" 
+                className="w-full py-7 rounded-xl bg-[#735AFB] hover:bg-white text-white font-semibold">
+                Login
+              </Button>
+            </form>
+          </Form>
+          <div className="flex items-center justify-center mt-6">
+            <div className="border-t border-gray-300 flex-grow"></div>
+            <span className="px-4 text-gray-500 text-xs">Or login with</span>
+            <div className="border-t border-gray-300 flex-grow"></div>
+          </div>
+          <div className="mt-4 flex justify-center space-x-4">
+            <Button className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100">
+              <Image className="w-5 h-5" src={google} alt="Google Icon" />
+              Google
+            </Button>
+            <Button className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100">
+              <Image className="w-5 h-5" src={linkedin} alt="LinkedIn Icon" />
+              LinkedIn
+            </Button>
+          </div>
+          <div className="mt-6 text-center text-gray-500 hover:text-blue-500 text-xs">
+            <Link href="/signup">Don't have an account?</Link>
+          </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
-
-export default Login;

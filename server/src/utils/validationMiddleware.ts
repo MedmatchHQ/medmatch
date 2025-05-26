@@ -11,7 +11,9 @@ import {
 } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
-import { ClassType } from "@/types/validation";
+
+/** Represents a constructor for a class */
+type ClassType<T> = { new (...args: any[]): T };
 
 /**
  * Returns a request handler that validates the request body against a class defined with `class-validator`.

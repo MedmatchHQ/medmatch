@@ -9,7 +9,7 @@ import {
 } from "@/modules/users";
 import { MongoError, ObjectId } from "mongodb";
 import { FileConflictError, FileNotFoundError } from "@/modules/files";
-import { MongooseCode } from "@/types/errorCodes";
+import { MongooseCode } from "@/types/errors";
 import bcrypt from "bcrypt";
 
 class UserService {

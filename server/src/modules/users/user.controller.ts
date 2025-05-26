@@ -1,5 +1,5 @@
 import { UserService, InputUser } from "@/modules/users";
-import { HandleErrors } from "@/utils/errorHandler";
+import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
 import { FileService, File } from "@/modules/files";
 
@@ -7,17 +7,9 @@ class UserController {
   constructor(
     private userService: UserService,
     private fileService: FileService
-  ) {
-    this.getAllUsers = this.getAllUsers.bind(this);
-    this.getUserById = this.getUserById.bind(this);
-    this.createUser = this.createUser.bind(this);
-    this.updateUser = this.updateUser.bind(this);
-    this.deleteUser = this.deleteUser.bind(this);
-    this.addFile = this.addFile.bind(this);
-    this.removeFile = this.removeFile.bind(this);
-  }
+  ) {}
 
-  @HandleErrors()
+  @ControllerMethod()
   async getAllUsers(req: Request, res: Response): Promise<void> {
     const users = await this.userService.getAllUsers();
     res.status(200).json({
@@ -27,7 +19,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async getUserById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const user = await this.userService.getUserById(id);
@@ -38,7 +30,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async createUser(req: Request, res: Response): Promise<void> {
     const userData: InputUser = req.body;
     const user = await this.userService.createUser(userData);
@@ -49,7 +41,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async updateUser(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const userData = req.body;
@@ -61,7 +53,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async deleteUser(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const user = await this.userService.deleteUser(id);
@@ -72,7 +64,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async addFile(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     const fileData = req.file!;
@@ -89,7 +81,7 @@ class UserController {
     });
   }
 
-  @HandleErrors()
+  @ControllerMethod()
   async removeFile(req: Request, res: Response): Promise<void> {
     const { userId, fileId } = req.params;
     await this.fileService.deleteFile(fileId);
