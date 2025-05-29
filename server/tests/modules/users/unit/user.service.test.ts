@@ -1,19 +1,15 @@
-import "reflect-metadata";
-import {
-  UserService,
-  UserModel,
-  UserNotFoundError,
-  UserConflictError,
-} from "@/modules/users";
 import { expectMatch } from "#/utils/validation";
 import { ObjectId } from "mongodb";
-import { FileConflictError, FileNotFoundError } from "@/modules/files";
+import { FileConflictError, FileNotFoundError } from "@/modules/files/utils/file.errors";
 import {
   createTestUser,
   defaultUserData,
-  createTestFile,
 } from "#/modules/users/utils/user.helpers";
 import { TestUserValidator } from "#/modules/users/utils/user.validators";
+import { createTestFile } from "#/modules/files/util/file.helpers";
+import { UserService } from "@/modules/users/user.service";
+import { UserModel } from "@/modules/users/user.model";
+import { UserConflictError, UserNotFoundError } from "@/modules/users/utils/user.errors";
 
 describe("User Service", () => {
   let userService: UserService;

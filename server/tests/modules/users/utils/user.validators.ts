@@ -1,27 +1,8 @@
 import { ProfileValidator, UserValidator } from "@/modules/users";
-import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-} from "class-validator";
+import { IsArray, IsDefined, ValidateNested } from "class-validator";
 import { Types } from "mongoose";
 import { Type } from "class-transformer";
-
-class TestFileValidator {
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
-
-  @IsString()
-  @IsIn(["image/jpeg", "image/png", "application/pdf"])
-  type!: string;
-
-  @IsNotEmpty()
-  data!: Buffer;
-}
+import { TestFileValidator } from "#/modules/files/util/file.validators";
 
 class TestProfileValidator extends ProfileValidator {
   @IsArray()

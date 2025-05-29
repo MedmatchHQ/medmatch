@@ -1,6 +1,4 @@
-import "reflect-metadata";
-import { UserController, UserService } from "@/modules/users";
-import { FileService } from "@/modules/files";
+import { FileService } from "@/modules/files/file.service";
 import { createMockRequest, createMockResponse } from "#/utils/express.mocks";
 import { Request, Response } from "express";
 import { ObjectId } from "mongodb";
@@ -8,10 +6,10 @@ import {
   createTestUser,
   defaultUserData,
 } from "#/modules/users/utils/user.helpers";
-import {
-  createMockUserService,
-  createMockFileService,
-} from "#/modules/users/utils/user.mocks";
+import { createMockUserService } from "#/modules/users/utils/user.mocks";
+import { UserService } from "@/modules/users/user.service";
+import { UserController } from "@/modules/users/user.controller";
+import { createMockFileService } from "#/modules/files/util/file.mocks";
 
 describe("User Controller", () => {
   let userService: jest.Mocked<UserService>;

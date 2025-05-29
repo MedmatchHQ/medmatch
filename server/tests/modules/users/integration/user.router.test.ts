@@ -4,15 +4,20 @@ import {
   HTTPMethod,
 } from "#/utils/mockAuthentication";
 import TestAgent from "supertest/lib/agent";
-import { createTestUser, defaultUserData } from "../utils/user.helpers";
-import { TestUserValidator } from "../utils/user.validators";
+import {
+  createTestUser,
+  defaultUserData,
+} from "#/modules/users/utils/user.helpers";
+import { TestUserValidator } from "#/modules/users/utils/user.validators";
 import {
   expectHttpErrorResponse,
   expectSuccessResponse,
 } from "#/utils/helpers";
-import { InputUser, User, UserCode, UserModel } from "@/modules/users";
-import { FileCode, FileModel } from "@/modules/files";
 import { ObjectId } from "mongodb";
+import { UserCode } from "@/modules/users/utils/user.errors";
+import { InputUser, User, UserModel } from "@/modules/users/user.model";
+import { FileModel } from "@/modules/files/file.model";
+import { FileCode } from "@/modules/files/utils/file.errors";
 
 describe("User Router", () => {
   let agent: TestAgent;

@@ -1,14 +1,4 @@
-import { UserService } from "@/modules/users";
-import { FileService } from "@/modules/files";
-
-const createMockFileService = () => {
-  const fileService = {} as jest.Mocked<FileService>;
-  fileService.getAllFiles = jest.fn();
-  fileService.getFileById = jest.fn();
-  fileService.createFile = jest.fn();
-  fileService.deleteFile = jest.fn();
-  return fileService;
-};
+import { UserService } from "@/modules/users/user.service";
 
 const createMockUserService = () => {
   const userService = {} as jest.Mocked<UserService>;
@@ -22,4 +12,4 @@ const createMockUserService = () => {
   return userService;
 };
 
-export { createMockFileService, createMockUserService };
+export { createMockUserService };

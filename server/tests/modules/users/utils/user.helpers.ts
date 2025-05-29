@@ -4,25 +4,7 @@ import {
   UserDoc,
   UserModel,
 } from "@/modules/users";
-import { File, FileModel } from "@/modules/files";
-
-
-async function createTestFile(data?: Partial<File>): Promise<File> {
-  const defaultFile: Omit<File, "id"> = {
-    type: "image/png",
-    name: `Test-${Date.now()}`,
-    data: Buffer.from("test data"),
-  };
-
-  const fileData = {
-    ...defaultFile,
-    ...data,
-  };
-
-  const file = new FileModel(fileData);
-  const doc = await file.save();
-  return File.fromDoc(doc);
-}
+import { createTestFile } from "#/modules/files/util/file.helpers";
 
 async function defaultUserData(): Promise<InputUser> {
   const testFile = await createTestFile();
@@ -73,7 +55,6 @@ async function createUnpopulatedTestUser(
 }
 
 export { 
-  createTestFile,
   defaultUserData,
   createTestUser,
   createUnpopulatedTestUser,
