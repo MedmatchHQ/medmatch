@@ -2,7 +2,7 @@ import { ProfileValidator, UserValidator } from "@/modules/users";
 import { IsArray, IsDefined, ValidateNested } from "class-validator";
 import { Types } from "mongoose";
 import { Type } from "class-transformer";
-import { TestFileValidator } from "#/modules/files/util/file.validators";
+import { TestFileValidator } from "#/modules/files/utils/file.validators";
 
 class TestProfileValidator extends ProfileValidator {
   @IsArray()

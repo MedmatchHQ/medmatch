@@ -4,7 +4,7 @@ import {
 } from "#/utils/validation";
 import {
   createTestUser,
-  defaultUserData,
+  getUserData,
 } from "#/modules/users/utils/user.helpers";
 import TestAgent from "supertest/lib/agent";
 import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
@@ -29,7 +29,7 @@ describe("User Validation", () => {
       {
         name: "invalid email format",
         getData: async () => {
-          const userData = await defaultUserData();
+          const userData = await getUserData();
           userData.email = "invalid email";
           return userData;
         },
@@ -57,7 +57,7 @@ describe("User Validation", () => {
       {
         name: "incorrect data types in profile",
         getData: async () => {
-          const user = await defaultUserData();
+          const user = await getUserData();
           return {
             ...user,
             profile: {

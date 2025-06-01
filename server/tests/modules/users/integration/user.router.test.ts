@@ -6,7 +6,7 @@ import {
 import TestAgent from "supertest/lib/agent";
 import {
   createTestUser,
-  defaultUserData,
+  getUserData,
 } from "#/modules/users/utils/user.helpers";
 import { TestUserValidator } from "#/modules/users/utils/user.validators";
 import {
@@ -85,7 +85,7 @@ describe("User Router", () => {
 
   describe("POST /", () => {
     it("should create a new user", async () => {
-      const userData = await defaultUserData();
+      const userData = await getUserData();
 
       const response = await agent.post("/api/users").send(userData);
 
@@ -103,7 +103,7 @@ describe("User Router", () => {
 
     it("should return an error for duplicate email", async () => {
       const user = await createTestUser();
-      const newData = await defaultUserData();
+      const newData = await getUserData();
       const duplicateEmailData = {
         ...newData,
         email: user.email.toUpperCase(),
@@ -123,7 +123,7 @@ describe("User Router", () => {
     });
 
     it("should hash the password", async () => {
-      const userData = await defaultUserData();
+      const userData = await getUserData();
 
       const response = await agent.post("/api/users").send(userData);
 

@@ -1,12 +1,7 @@
-import {
-  InputUser,
-  User,
-  UserDoc,
-  UserModel,
-} from "@/modules/users";
-import { createTestFile } from "#/modules/files/util/file.helpers";
+import { InputUser, User, UserDoc, UserModel } from "@/modules/users";
+import { createTestFile } from "#/modules/files/utils/file.helpers";
 
-async function defaultUserData(): Promise<InputUser> {
+async function getUserData(): Promise<InputUser> {
   const testFile = await createTestFile();
   return {
     first: `Test-${Date.now()}`,
@@ -22,8 +17,12 @@ async function defaultUserData(): Promise<InputUser> {
   };
 }
 
+/**
+ * @param data Optional data to override the default file data.
+ * Defaults to {@link getUserData}.
+ */
 async function createTestUser(data?: Partial<InputUser>): Promise<User> {
-  const defaultUser = await defaultUserData();
+  const defaultUser = await getUserData();
 
   const userData = {
     ...defaultUser,
@@ -36,10 +35,14 @@ async function createTestUser(data?: Partial<InputUser>): Promise<User> {
   return User.fromDoc(populated);
 }
 
+/**
+ * @param data Optional data to override the default user data.
+ * Defaults to {@link getUserData}.
+ */
 async function createUnpopulatedTestUser(
   data?: Partial<InputUser>
 ): Promise<InputUser & { id: string }> {
-  const defaultUser = await defaultUserData();
+  const defaultUser = await getUserData();
 
   const userData = {
     ...defaultUser,
@@ -54,8 +57,4 @@ async function createUnpopulatedTestUser(
   };
 }
 
-export { 
-  defaultUserData,
-  createTestUser,
-  createUnpopulatedTestUser,
-}
+export { getUserData, createTestUser, createUnpopulatedTestUser };

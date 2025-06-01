@@ -1,9 +1,9 @@
 import {
   createTestFile,
-  defaultFileData,
-} from "#/modules/files/util/file.helpers";
+  getFileData,
+} from "#/modules/files/utils/file.helpers";
 import { expectMatch } from "#/utils/validation";
-import { TestFileValidator } from "#/modules/files/util/file.validators";
+import { TestFileValidator } from "#/modules/files/utils/file.validators";
 import { FileService } from "@/modules/files/file.service";
 import { FileModel, File } from "@/modules/files/file.model";
 import { FileNotFoundError } from "@/modules/files/utils/file.errors";
@@ -58,7 +58,7 @@ describe("File Service", () => {
 
   describe("createFile", () => {
     it("should add the file to the database", async () => {
-      const fileData = defaultFileData();
+      const fileData = getFileData();
 
       const createdFile = await fileService.createFile(fileData);
 
@@ -72,7 +72,7 @@ describe("File Service", () => {
     });
 
     it("should return the created file", async () => {
-      const fileData = defaultFileData();
+      const fileData = getFileData();
 
       const createdFile = await fileService.createFile(fileData);
       expect(createdFile).toBeInstanceOf(File);

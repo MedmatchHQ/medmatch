@@ -1,4 +1,5 @@
-import { Response } from "supertest";
+import { Response as SupertestResponse } from "supertest";
+import { Response as ExpressResponse } from "express";
 import { expectMatch } from "#/utils/validation";
 import {
   HttpErrorBodyValidator,
@@ -8,9 +9,8 @@ import { ClassType } from "@/types/validation";
 import { HttpError } from "@/types/errors";
 
 /**
- * Expects the given HTTP response to match the expected structure for a successful response.
- * Checks the status code, content-type header, optionally validates the response body
- * against the provided data validator, and optionally checks if the response data is equal to the provided data.
+ * Expects the given HTTP response to match the structure for a successful response in an integration test.
+ * Optionally validates the response body against the provided data validator, and optionally checks if the response data is equal to the provided data.
  *
  * @param response - The HTTP response object to validate.
  * @param dataValidator - An optional validator for the response data. Provide the class inside a tuple if the data is an array (e.g. `dataValidator = [UserValidator]`),
@@ -21,7 +21,7 @@ import { HttpError } from "@/types/errors";
  * @template T - The class type of the data validator.
  */
 async function expectSuccessResponse<T extends ClassType<object>>(
-  response: Response,
+  response: SupertestResponse,
   dataValidator?: T | [T],
   data?: any,
   overrides?: {
@@ -56,8 +56,7 @@ async function expectSuccessResponse<T extends ClassType<object>>(
 }
 
 /**
- * Asserts that an HTTP response matches the expected error response structure and values.
- * Checks the status code, content-type header, validates the response body, and optionally checks for specific error details in the response body.
+ * Expects the given HTTP response to match the error response structure and values.
  *
  * @param response - The HTTP response object to validate.
  * @param options.status - The expected HTTP status code. Defaults to `400`.
@@ -65,7 +64,7 @@ async function expectSuccessResponse<T extends ClassType<object>>(
  * @param options.errors - An array of partial `HttpError` objects representing the expected errors in the response body. Only included fields will be checked.
  */
 async function expectHttpErrorResponse(
-  response: Response,
+  response: SupertestResponse,
   options: {
     status?: number;
     contentHeader?: string;
@@ -96,4 +95,30 @@ async function expectHttpErrorResponse(
   }
 }
 
-export { expectSuccessResponse, expectHttpErrorResponse };
+/**
+ * Utility function to assert the success response of a controller method in a unit test.
+ * @param res - The mocked response object from the controller.
+ * @param expectations - The expected values for status, message, and data.
+ * @param expectations.status - 200
+ * @param expectations.message - Any string (using `expect.any(String)`)
+ * @param expectations.data - The expected data in the response
+ * @template T - The type of the data in the response.
+ */
+function expectControllerSuccessResponse<T>(
+  res: jest.Mocked<ExpressResponse>,
+  expectations: { status?: number; message?: string; data?: T }
+) {
+  const {
+    status = 200,
+    message = expect.any(String),
+    data,
+  } = expectations || {};
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith({
+    status: "success",
+    message,
+    data,
+  });
+}
+
+export { expectSuccessResponse, expectHttpErrorResponse, expectControllerSuccessResponse };

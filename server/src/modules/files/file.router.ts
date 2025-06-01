@@ -22,7 +22,7 @@ fileRouter.use(authenticate);
 
 fileRouter.get("/", fileController.getAllFiles);
 
-fileRouter.get("/:id", validateId("id"), fileController.getFileById);
+fileRouter.get("/:id", validation(validateId()), fileController.getFileById);
 
 fileRouter.post(
   "/",
@@ -31,6 +31,6 @@ fileRouter.post(
   fileController.createFile
 );
 
-fileRouter.delete("/:id", validateId("id"), fileController.deleteFile);
+fileRouter.delete("/:id", validation(validateId()), fileController.deleteFile);
 
 export { fileRouter };

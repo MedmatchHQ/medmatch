@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { param, validationResult } from "express-validator";
+import { check, param, validationResult } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
 import { FileValidator } from "@/modules/files";
@@ -27,17 +27,23 @@ function validateObjectByClass<T extends object>(
       locals: { classValidatorErrors?: ClassValidationError[] };
     },
     next: NextFunction
-  ): Promise<any> => {
-    const instance = plainToInstance(classType, req[field]);
-    const result = await validate(instance, {
-      skipMissingProperties: isPartial,
-    });
-    if (result.length > 0) {
-      const errors = res.locals.classValidatorErrors;
-      res.locals.classValidatorErrors = errors ? errors.concat(result) : result;
+  ): Promise<void> => {
+    try {
+      const instance = plainToInstance(classType, req[field]);
+      const result = await validate(instance, {
+        skipMissingProperties: isPartial,
+      });
+      if (result.length > 0) {
+        const errors = res.locals.classValidatorErrors;
+        res.locals.classValidatorErrors = errors
+          ? errors.concat(result)
+          : result;
+      }
+      req[field] = instance; // Remove extra fields
+      next();
+    } catch (err) {
+      next(err);
     }
-    req[field] = instance; // Remove extra fields
-    next();
   };
 }
 
@@ -47,8 +53,9 @@ function validateObjectByClass<T extends object>(
  * Most commonly used for POST requests.
  * @param classType The class to validate the request body against
  */
-const validateBody = <T extends object>(classType: ClassType<T>) =>
-  validateObjectByClass<T>(classType, false, "body");
+const validateBody = <T extends object>(
+  classType: ClassType<T>
+): RequestHandler => validateObjectByClass<T>(classType, false, "body");
 
 /**
  * Returns a request handler that validates the request body against a class
@@ -56,8 +63,9 @@ const validateBody = <T extends object>(classType: ClassType<T>) =>
  * Most commonly used for PUT/PATCH requests.
  * @param classType The class to validate the request body against
  */
-const validatePartialBody = <T extends object>(classType: ClassType<T>) =>
-  validateObjectByClass<T>(classType, true, "body");
+const validatePartialBody = <T extends object>(
+  classType: ClassType<T>
+): RequestHandler => validateObjectByClass<T>(classType, true, "body");
 
 /**
  * Returns a request handler that validates the file on the request object
@@ -69,9 +77,9 @@ const validateFile = <T extends object>(classType: ClassType<T>) =>
 
 /**
  * Returns a request handler that validates a path param as a MongoDB ID.
- * @param paramName Name of the path param to be validated
+ * @param paramName Name of the path param to be validated (default is "id").
  */
-const validateId = (paramName: string): RequestHandler =>
+const validateId = (paramName: string = "id"): RequestHandler =>
   param(paramName)
     .isMongoId()
     .withMessage(`Path parameter ${paramName} is not a valid MongoID`);
@@ -80,7 +88,7 @@ const validateId = (paramName: string): RequestHandler =>
  * Formats the `express-validator` validation result to the custom `ValidationError` type.
  */
 const formattedValidationResult = validationResult.withDefaults({
-  formatter: (error) =>
+  formatter: (error): IValidationError =>
     ({
       type: "validation",
       loc: error.type === "field" ? error.location : "other",
