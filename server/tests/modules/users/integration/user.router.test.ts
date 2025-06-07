@@ -14,10 +14,14 @@ import {
   expectSuccessResponse,
 } from "#/utils/helpers";
 import { ObjectId } from "mongodb";
-import { UserCode } from "@/modules/users/utils/user.errors";
+import {
+  UserCode,
+  UserConflictError,
+  UserNotFoundError,
+} from "@/modules/users/utils/user.errors";
 import { InputUser, User, UserModel } from "@/modules/users/user.model";
 import { FileModel } from "@/modules/files/file.model";
-import { FileCode } from "@/modules/files/utils/file.errors";
+import { FileCode, FileNotFoundError } from "@/modules/files/utils/file.errors";
 
 describe("User Router", () => {
   let agent: TestAgent;
@@ -74,10 +78,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: UserCode.UserNotFound,
-          },
+          new UserNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });
@@ -114,10 +115,9 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 409,
         errors: [
-          {
-            details: expect.stringContaining(user.email.toUpperCase()),
-            code: UserCode.UserConflict,
-          },
+          new UserConflictError(
+            expect.stringContaining(user.email.toUpperCase())
+          ),
         ],
       });
     });
@@ -162,10 +162,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: UserCode.UserNotFound,
-          },
+          new UserNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });
@@ -184,10 +181,9 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 409,
         errors: [
-          {
-            details: expect.stringContaining(user2.email.toUpperCase()),
-            code: UserCode.UserConflict,
-          },
+          new UserConflictError(
+            expect.stringContaining(user2.email.toUpperCase())
+          ),
         ],
       });
     });
@@ -228,10 +224,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: UserCode.UserNotFound,
-          },
+          new UserNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });
@@ -280,10 +273,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: UserCode.UserNotFound,
-          },
+          new UserNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });
@@ -320,10 +310,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: UserCode.UserNotFound,
-          },
+          new UserNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });
@@ -339,10 +326,7 @@ describe("User Router", () => {
       await expectHttpErrorResponse(response, {
         status: 404,
         errors: [
-          {
-            details: expect.stringContaining(badId.toString()),
-            code: FileCode.FileNotFound,
-          },
+          new FileNotFoundError(expect.stringContaining(badId.toString())),
         ],
       });
     });

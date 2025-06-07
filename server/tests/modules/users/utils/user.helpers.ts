@@ -1,5 +1,6 @@
 import { InputUser, User, UserDoc, UserModel } from "@/modules/users";
 import { createTestFile } from "#/modules/files/utils/file.helpers";
+import bcrypt from "bcrypt";
 
 async function getUserData(): Promise<InputUser> {
   const testFile = await createTestFile();
@@ -23,10 +24,12 @@ async function getUserData(): Promise<InputUser> {
  */
 async function createTestUser(data?: Partial<InputUser>): Promise<User> {
   const defaultUser = await getUserData();
+  const password = data?.password ?? defaultUser.password;
 
   const userData = {
     ...defaultUser,
     ...data,
+    password: await bcrypt.hash(password, 10),
   };
 
   const user = new UserModel(userData);
