@@ -25,9 +25,11 @@ interface IHttpError extends IApiError {
   code: ErrorCode;
 }
 
+type ErrorLocation = Location | "file" | "other";
+
 interface IValidationError extends IApiError {
   type: "validation";
-  loc: Location | "other";
+  loc: ErrorLocation;
   field: string;
   details: string;
 }
@@ -84,4 +86,5 @@ export {
   IValidationError,
   GeneralCode,
   MongooseCode,
+  ErrorLocation,
 };

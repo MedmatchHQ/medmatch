@@ -1,7 +1,11 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { check, param, validationResult } from "express-validator";
+import {
+  param,
+  validationResult,
+  ValidationError as ExpressValidationError,
+} from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
 import { FileValidator } from "@/modules/files";
@@ -84,17 +88,42 @@ const validateId = (paramName: string = "id"): RequestHandler =>
     .isMongoId()
     .withMessage(`Path parameter ${paramName} is not a valid MongoID`);
 
+const formatExpressError = (
+  error: ExpressValidationError
+): IValidationError => ({
+  type: "validation",
+  loc: error.type === "field" ? error.location : "other",
+  field: error.type === "field" ? error.path : "no_field",
+  details: error.msg,
+});
+
 /**
  * Formats the `express-validator` validation result to the custom `ValidationError` type.
  */
-const formattedValidationResult = validationResult.withDefaults({
-  formatter: (error): IValidationError =>
-    ({
-      type: "validation",
-      loc: error.type === "field" ? error.location : "other",
-      field: error.type === "field" ? error.path : "no_field",
-      details: error.msg,
-    } as IValidationError),
+const formatExpressErrors = (
+  expressErrors: ExpressValidationError[]
+): IValidationError[] => {
+  const newErrors: IValidationError[] = [];
+
+  for (const err of expressErrors) {
+    if (err.type === "alternative_grouped" || err.type === "alternative") {
+      newErrors.push(...err.nestedErrors.flat().map(formatExpressError));
+    } else {
+      newErrors.push(formatExpressError(err));
+    }
+  }
+
+  return newErrors;
+};
+
+const formatClassError = (
+  error: ClassValidationError,
+  message: string
+): IValidationError => ({
+  type: "validation",
+  loc: error.target instanceof FileValidator ? "file" : "body",
+  field: error.property,
+  details: message,
 });
 
 /**
@@ -103,23 +132,21 @@ const formattedValidationResult = validationResult.withDefaults({
 function formatClassErrors(
   classErrors: ClassValidationError[]
 ): IValidationError[] {
-  // use flatMap to handle nested errors
-  return classErrors.flatMap((error) =>
-    // If there are no children, add the error
-    error.children === undefined || error.children.length === 0
-      ? // Map the constraints to a list of validation errors
-        Object.values(error.constraints ?? {}).map(
-          (msg) =>
-            ({
-              type: "validation",
-              loc: error.target instanceof FileValidator ? "file" : "body",
-              field: error.property,
-              details: msg,
-            } as IValidationError)
+  const newErrors: IValidationError[] = [];
+
+  for (const err of classErrors.flat()) {
+    if (err.children === undefined || err.children.length === 0) {
+      newErrors.push(
+        ...Object.values(err.constraints ?? {}).map((msg) =>
+          formatClassError(err, msg)
         )
-      : // If there are children, recursively add the children
-        formatClassErrors(error.children)
-  );
+      );
+    } else {
+      newErrors.push(...formatClassErrors(err.children));
+    }
+  }
+
+  return newErrors;
 }
 
 /**
@@ -127,7 +154,9 @@ function formatClassErrors(
  * If there are, it sends a response with status 400 and the errors.
  */
 function endValidation(req: Request, res: Response, next: NextFunction): any {
-  const expressValidatorErrors = formattedValidationResult(req).array();
+  const expressValidatorErrors = formatExpressErrors(
+    validationResult(req).array()
+  );
   const classValidatorErrors = formatClassErrors(
     res.locals.classValidatorErrors ?? []
   );

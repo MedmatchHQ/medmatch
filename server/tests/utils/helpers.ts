@@ -27,10 +27,14 @@ async function expectSuccessResponse<T extends ClassType<object>>(
   overrides?: {
     status?: number;
     contentHeader?: string;
+    message?: string;
   }
 ) {
-  const { status = 200, contentHeader = "application/json; charset=utf-8" } =
-    overrides || {};
+  const {
+    status = 200,
+    contentHeader = "application/json; charset=utf-8",
+    message = expect.any(String),
+  } = overrides || {};
 
   expect(response.status).toBe(status);
   expect(response.headers["content-type"]).toBe(contentHeader);
@@ -40,19 +44,19 @@ async function expectSuccessResponse<T extends ClassType<object>>(
     expect(response.body.data).toMatchObject<T>(rawData);
   }
 
+  let validator;
+
   if (dataValidator === undefined) {
-    return;
+    validator = SuccessBodyValidator;
   } else if (Array.isArray(dataValidator)) {
-    await expectMatch(
-      SuccessBodyValidator.withArrayData(dataValidator[0]),
-      response.body
-    );
+    validator = SuccessBodyValidator.withArrayData(dataValidator[0]);
   } else {
-    await expectMatch(
-      SuccessBodyValidator.withData(dataValidator),
-      response.body
-    );
+    validator = SuccessBodyValidator.withData(dataValidator);
   }
+
+  await expectMatch(validator, response.body);
+
+  expect(response.body.message).toEqual(message);
 }
 
 /**
@@ -121,4 +125,8 @@ function expectControllerSuccessResponse<T>(
   });
 }
 
-export { expectSuccessResponse, expectHttpErrorResponse, expectControllerSuccessResponse };
+export {
+  expectSuccessResponse,
+  expectHttpErrorResponse,
+  expectControllerSuccessResponse,
+};

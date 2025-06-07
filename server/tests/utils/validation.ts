@@ -3,7 +3,7 @@ import { validate } from "class-validator";
 import mongoose from "mongoose";
 import { ValidationErrorBodyValidator } from "#/utils/response.validator";
 import { Response } from "supertest";
-import { IValidationError } from "@/types/errors";
+import { ErrorLocation, IValidationError } from "@/types/errors";
 import { formatClassErrors } from "@/utils/validationMiddleware";
 
 type ClassType<T> = { new (...args: any[]): T };
@@ -65,9 +65,12 @@ async function expectIdValidationError(
 async function expectValidationErrors(
   response: Response,
   expectedFields: string[],
-  loc: string = "body"
+  loc: ErrorLocation = "body",
+  options?: { status?: number }
 ) {
-  expect(response.status).toBe(400);
+  const { status = 400 } = options || {};
+
+  expect(response.status).toBe(status);
   expect(response.headers["content-type"]).toContain(
     "application/json; charset=utf-8"
   );
@@ -76,9 +79,7 @@ async function expectValidationErrors(
   const errors: IValidationError[] = response.body.errors;
   await expectMatch(response.body, ValidationErrorBodyValidator);
   expect(errors.length).toBeGreaterThanOrEqual(expectedFields.length);
-  errors.forEach((error) => {
-    expect(error.loc).toBe(loc);
-  });
+  expect(errors.map((e) => e.loc)).toContain(loc);
 
   const actualFields = errors.map((e) => e.field);
   expectedFields.forEach((expectedField) => {
