@@ -56,7 +56,6 @@ class AuthController {
    * Clears the refresh token cookie, preventing further access to the application.
    * @returns null
    * @codes 200
-   * @throws No errors
    * @note This function does not require any parameters.
    */
   @ControllerMethod()

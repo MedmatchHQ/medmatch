@@ -29,6 +29,31 @@ Other important helper functions are `validatePartialBody`, which only validates
 ???+ info "The `validation` Function"
     All validation middleware must be wrapped in the `validation` function. This ensures that all errors are properly aggregated and sent to the error handler if necessary
 
+??? info "Validator Classes"
+    Validator classes are where you define the constraints that you want the incoming objects to fit. Below is an example of a validator you might use on a request body to a POST users endpoint
+
+    ```ts linenums="1" title="/utils/user.validators.ts"
+    class UserValidator {
+        @IsString()
+        @IsNotEmpty()
+        name!: string;
+
+        @IsEmail()
+        @IsNotEmpty()
+        email!: string;
+
+        @IsString()
+        @IsNotEmpty()
+        password!: string;
+
+        @IsNotEmpty()
+        @IsInt()
+        @Min(1)
+        age!: number;
+    }
+    ```
+    Note that Typescript will yell at you if you don't use the non-null assertion operator (the exclamation point)
+
 Feel free to take a look at the `class-validator` [docs](https://github.com/typestack/class-validator?tab=readme-ov-file#validation-errors), although some more details will be given in the `utils` section.
 
 ### Non-Body Parameter Validation with `express-validator`

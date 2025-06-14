@@ -5,10 +5,15 @@ import { FileService, File } from "@/modules/files";
 
 class UserController {
   constructor(
-    private userService: UserService,
-    private fileService: FileService
+    private userService: UserService = new UserService(),
+    private fileService: FileService = new FileService()
   ) {}
 
+  /**
+   * Retrieves all users from the database with populated profile files.
+   * @returns An array of all users
+   * @codes 200
+   */
   @ControllerMethod()
   async getAllUsers(req: Request, res: Response): Promise<void> {
     const users = await this.userService.getAllUsers();
@@ -19,6 +24,13 @@ class UserController {
     });
   }
 
+  /**
+   * Retrieves a specific user by their unique identifier with populated profile files.
+   * @param {string} req.params.id The unique identifier of the user to retrieve
+   * @returns The user object if found
+   * @codes 200, 404
+   * @throws A {@link UserNotFoundError} if the user with the specified id is not found
+   */
   @ControllerMethod()
   async getUserById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
@@ -30,6 +42,13 @@ class UserController {
     });
   }
 
+  /**
+   * Creates a new user with the provided user data and hashed password.
+   * @param {InputUser} req.body The input user data used to create a new user
+   * @returns The newly created user object with populated profile files
+   * @codes 201, 409
+   * @throws A {@link UserConflictError} if a user with the same email already exists
+   */
   @ControllerMethod()
   async createUser(req: Request, res: Response): Promise<void> {
     const userData: InputUser = req.body;
@@ -41,6 +60,15 @@ class UserController {
     });
   }
 
+  /**
+   * Updates an existing user with the provided data, hashing password if included.
+   * @param {string} req.params.id The unique identifier of the user to update
+   * @param {Partial<InputUser>} req.body Partial user data to update
+   * @returns The updated user object with populated profile files
+   * @codes 200, 404, 409
+   * @throws A {@link UserNotFoundError} if the user with the specified id is not found
+   * @throws A {@link UserConflictError} if the email update conflicts with an existing user
+   */
   @ControllerMethod()
   async updateUser(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
@@ -53,6 +81,13 @@ class UserController {
     });
   }
 
+  /**
+   * Deletes a user by their unique identifier.
+   * @param {string} req.params.id The unique identifier of the user to delete
+   * @returns The deleted user object with populated profile files
+   * @codes 200, 404
+   * @throws A {@link UserNotFoundError} if the user with the specified id is not found
+   */
   @ControllerMethod()
   async deleteUser(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
@@ -64,6 +99,15 @@ class UserController {
     });
   }
 
+  /**
+   * Creates a new file from uploaded data and adds it to the specified user's profile.
+   * @param {string} req.params.id The unique identifier of the user
+   * @param {Express.Multer.File} req.file The uploaded file data from multer middleware
+   * @returns The updated user object with the new file added to their profile
+   * @codes 200, 404, 409
+   * @throws A {@link UserNotFoundError} if the user with the specified id is not found
+   * @throws A {@link FileConflictError} if the file is already associated with the user
+   */
   @ControllerMethod()
   async addFile(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
@@ -81,6 +125,15 @@ class UserController {
     });
   }
 
+  /**
+   * Removes a file from a user's profile and deletes it from the database.
+   * @param {string} req.params.userId The unique identifier of the user
+   * @param {string} req.params.fileId The unique identifier of the file to remove
+   * @returns The updated user object with the file removed from their profile
+   * @codes 200, 404
+   * @throws A {@link UserNotFoundError} if the user with the specified id is not found
+   * @throws A {@link FileNotFoundError} if the file is not associated with the user or doesn't exist
+   */
   @ControllerMethod()
   async removeFile(req: Request, res: Response): Promise<void> {
     const { userId, fileId } = req.params;

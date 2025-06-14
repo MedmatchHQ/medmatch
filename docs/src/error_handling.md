@@ -37,7 +37,7 @@ To enable the error handler to construct precise HTTP responses, we utilize cust
 ??? info "Further Specializing Errors"
     Each module will typically further extend specific `HttpError`s for readability and the DRY principle. For example, the `User` module creates its own `UserNotFoundError`:
 
-    ```typescript linenums="1" title="user.errors.ts"
+    ```typescript linenums="1" title="utils/user.errors.ts"
     class UserNotFoundError extends NotFoundError {
         constructor(message: string = "User not found") {
             super(message, UserCode.UserNotFound);

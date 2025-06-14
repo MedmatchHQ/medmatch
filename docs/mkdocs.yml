@@ -43,6 +43,9 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
+  - Home: index.md
   - Error Handling: error_handling.md
   - Input Validation: input_validation.md
   - The Data Layer: data_layer.md
+  - The Service Layer: service_layer.md
+  - The Controller Layer: controller_layer.md

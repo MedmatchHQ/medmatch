@@ -1,11 +1,9 @@
 import Router from "express";
 import {
-  UserService,
   UserController,
   UserValidator,
-  UserModel,
 } from "@/modules/users";
-import { FileModel, FileService, FileValidator } from "@/modules/files";
+import { FileValidator } from "@/modules/files";
 import {
   validation,
   validateBody,
@@ -18,9 +16,7 @@ import { body } from "express-validator";
 import { authenticate } from "@/utils/authentication";
 
 const userRouter = Router();
-const userService = new UserService(UserModel);
-const fileService = new FileService(FileModel);
-const userController = new UserController(userService, fileService);
+const userController = new UserController();
 const upload = multer();
 
 userRouter.use(authenticate);
