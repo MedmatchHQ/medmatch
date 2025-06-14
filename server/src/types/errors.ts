@@ -15,17 +15,15 @@ enum GeneralCode {
 }
 
 // Discriminated type union to enable efficient type assertion
-interface IApiError {
-  type: "http" | "validation";
+type IApiError = IHttpError | IValidationError;
+
+interface IHttpError {
+  type: "http";
+  code: ErrorCode;
   details: string;
 }
 
-interface IHttpError extends IApiError {
-  type: "http";
-  code: ErrorCode;
-}
-
-interface IValidationError extends IApiError {
+interface IValidationError {
   type: "validation";
   loc: Location | "other";
   field: string;
