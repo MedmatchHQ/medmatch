@@ -1,1 +1,0 @@
-# MedMatch Project Documentation

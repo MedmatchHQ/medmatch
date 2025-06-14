@@ -43,7 +43,6 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - Home: index.md
-  - API: api_overview.md
-  - File Structure: file_structure.md
-  - Onboarding: onboarding.md
+  - Error Handling: error_handling.md
+  - Input Validation: input_validation.md
+  - The Data Layer: data_layer.md
