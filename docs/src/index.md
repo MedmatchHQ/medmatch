@@ -3,7 +3,7 @@ This is a quick overview of how the entire API functions. For more in depth info
 ### Layers
 The API is built on a multi-layer architecture. An overview of each layer and its function:
 
-* **Data Layer** - Defines models that represent how data is structred in the database, and provides methods for simple database actions.
+* **Data Layer** - Defines models that represent how data is structured in the database, and provides methods for simple database actions.
 * **Service Layer** - Interfaces with the database and returns data in a defined structure. If any data related errors (such as 404s and 409s) occur, this is where they are handled.
 * **Controller Layer** - Handles core HTTP logic for the route, including extracting data from the request, performing the action requested via the injected service, and returning a response.
 * **Router Layer** - Configures relevant services and controllers, defines the paths for each endpoint, and applies input validation and other middleware.
