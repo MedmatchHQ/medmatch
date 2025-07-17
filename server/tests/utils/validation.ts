@@ -77,7 +77,6 @@ async function expectValidationErrors(
   await expectMatch(response.body, ValidationErrorBodyValidator);
 
   const errors: IValidationError[] = response.body.errors;
-  await expectMatch(response.body, ValidationErrorBodyValidator);
   expect(errors.length).toBeGreaterThanOrEqual(expectedFields.length);
   expect(errors.map((e) => e.loc)).toContain(loc);
 
