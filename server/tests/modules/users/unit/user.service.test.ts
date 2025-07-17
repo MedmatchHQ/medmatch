@@ -1,21 +1,23 @@
-import "reflect-metadata";
-import {
-  UserService,
-  UserModel,
-  UserNotFoundError,
-  UserConflictError,
-} from "@/modules/users";
-import {
-  createTestFile,
-  createTestUser,
-  defaultUserData,
-  TestUserValidator,
-} from "#/modules/users/user.utils";
 import { expectMatch } from "#/utils/validation";
 import { ObjectId } from "mongodb";
-import { FileConflictError, FileNotFoundError } from "@/modules/files";
+import {
+  FileConflictError,
+  FileNotFoundError,
+} from "@/modules/files/utils/file.errors";
+import {
+  createTestUser,
+  getUserData,
+} from "#/modules/users/utils/user.helpers";
+import { TestUserValidator } from "#/modules/users/utils/user.validators";
+import { createTestFile } from "#/modules/files/utils/file.helpers";
+import { UserService } from "@/modules/users/user.service";
+import { UserModel } from "@/modules/users/user.model";
+import {
+  UserConflictError,
+  UserNotFoundError,
+} from "@/modules/users/utils/user.errors";
 
-describe("UserService", () => {
+describe("User Service", () => {
   let userService: UserService;
 
   beforeEach(() => {
@@ -46,7 +48,7 @@ describe("UserService", () => {
       expect(users.length).toBe(1);
       expect(users[0].id).toEqual(user.id);
       expect(users[0].profile.files[0].id).toEqual(user.profile.files[0].id);
-      expectMatch(TestUserValidator, users[0]);
+      await expectMatch(TestUserValidator, users[0]);
     });
   });
 
@@ -68,7 +70,7 @@ describe("UserService", () => {
       const foundFiles = foundUser.profile.files;
       expect(foundFiles.length).toBeGreaterThan(0);
       expect(foundFiles[0].id).toEqual(originalFiles[0].id);
-      expectMatch(TestUserValidator, foundUser);
+      await expectMatch(TestUserValidator, foundUser);
     });
 
     it("should throw a UserNotFoundError if the user does not exist", async () => {
@@ -83,7 +85,7 @@ describe("UserService", () => {
 
   describe("createUser", () => {
     it("should add a user to the database", async () => {
-      const userData = await defaultUserData();
+      const userData = await getUserData();
       await userService.createUser(userData);
 
       const users = await UserModel.find();
@@ -91,17 +93,17 @@ describe("UserService", () => {
     });
 
     it("should return the created user", async () => {
-      const userData = await defaultUserData();
+      const userData = await getUserData();
       const createdUser = await userService.createUser(userData);
 
       const users = await UserModel.find();
       expect(users[0].id).toEqual(createdUser.id);
-      expectMatch(TestUserValidator, createdUser);
+      await expectMatch(TestUserValidator, createdUser);
     });
 
     it("should throw a UserConflictError if the email is already in use", async () => {
       expect.assertions(1);
-      const userData = await defaultUserData();
+      const userData = await getUserData();
       await userService.createUser(userData);
 
       await expect(userService.createUser(userData)).rejects.toThrow(
@@ -111,7 +113,7 @@ describe("UserService", () => {
 
     it("should throw a UserConflictError for a case-insensitive email conflict", async () => {
       expect.assertions(1);
-      const userData = await defaultUserData();
+      const userData = await getUserData();
       await userService.createUser(userData);
 
       await expect(
@@ -160,7 +162,7 @@ describe("UserService", () => {
       expect(updatedUser.id).not.toEqual(user2.id);
       expect(updatedUser.id).toEqual(user1.id);
       expect(updatedUser.first).toEqual(newFirst);
-      expectMatch(TestUserValidator, updatedUser);
+      await expectMatch(TestUserValidator, updatedUser);
     });
 
     it("should throw a UserNotFoundError for a non-existent user", async () => {
@@ -224,7 +226,7 @@ describe("UserService", () => {
       const deletedUser = await userService.deleteUser(user.id.toString());
 
       expect(deletedUser.id).toEqual(user.id);
-      expectMatch(TestUserValidator, deletedUser);
+      await expectMatch(TestUserValidator, deletedUser);
     });
 
     it("should throw a UserNotFoundError for a non-existent user", async () => {
@@ -265,7 +267,7 @@ describe("UserService", () => {
 
       expect(updatedUser.id).toEqual(user.id);
       expect(updatedFiles.some((f) => f.id === file.id)).toBe(true);
-      expectMatch(TestUserValidator, updatedUser);
+      await expectMatch(TestUserValidator, updatedUser);
     });
 
     it("should throw a UserNotFoundError if the user does not exist", async () => {
@@ -317,7 +319,7 @@ describe("UserService", () => {
 
       expect(updatedUser.id).toEqual(user.id);
       expect(updatedFiles.some((f) => f.id === file.id)).toBe(false);
-      expectMatch(TestUserValidator, updatedUser);
+      await expectMatch(TestUserValidator, updatedUser);
     });
 
     it("should throw a UserNotFoundError if the user does not exist", async () => {

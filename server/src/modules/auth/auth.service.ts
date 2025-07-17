@@ -104,15 +104,29 @@ class AuthService {
 
     const { email, id } = decoded as { email: string; id: string };
 
-    const user = await this.userService.getUserById(id);
-    if (!user) {
-      // User associated with token should exist
+    let user: User;
+    try {
+      user = await this.userService.getUserById(id);
+    } catch (error) {
+      if (error instanceof UserNotFoundError) {
+        // User associated with token should exist
+        throw new UnauthorizedError("Invalid refresh token");
+      }
+      throw error;
+    }
+
+    if (user.email !== email) {
+      // User email should match the token payload
       throw new UnauthorizedError("Invalid refresh token");
     }
 
-    const accessToken = jwt.sign({ email, id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
+    const accessToken = jwt.sign(
+      { email, id },
+      process.env.ACCESS_TOKEN_SECRET!,
+      {
+        expiresIn: "15m",
+      }
+    );
     return accessToken;
   }
 }

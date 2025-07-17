@@ -16,24 +16,25 @@ async function authenticate(
 ): Promise<any> {
   try {
     const { authorization } = req.headers;
+
     if (!authorization) {
       throw new UnauthorizedError("No authorization header provided");
     }
-    
+
     // Extract token from "Bearer <token>" format
     const token = authorization.split(" ")[1];
-  
+
     if (token === undefined) {
       throw new UnauthorizedError("No token provided");
     }
-  
-    let decoded;
+
+    let decoded: any;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
     } catch (error) {
       throw new UnauthorizedError("Unauthorized token");
     }
-  
+
     if (
       !decoded ||
       typeof decoded !== "object" ||
@@ -42,11 +43,11 @@ async function authenticate(
     ) {
       throw new UnauthorizedError("Invalid payload shape");
     }
-  
+
     res.locals.user = {
       email: decoded.email,
       id: decoded.id,
-    }
+    };
     next();
   } catch (error) {
     next(error);

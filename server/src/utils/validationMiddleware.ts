@@ -3,14 +3,12 @@ import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import {
   param,
-  Result,
   validationResult,
-  ValidationError,
-  Meta,
-  FieldValidationError,
+  ValidationError as ExpressValidationError,
 } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
+import { FileValidator } from "@/modules/files";
 
 /** Represents a constructor for a class */
 type ClassType<T> = { new (...args: any[]): T };
@@ -33,17 +31,23 @@ function validateObjectByClass<T extends object>(
       locals: { classValidatorErrors?: ClassValidationError[] };
     },
     next: NextFunction
-  ): Promise<any> => {
-    const instance = plainToInstance(classType, req[field]);
-    const result = await validate(instance, {
-      skipMissingProperties: isPartial,
-    });
-    if (result.length > 0) {
-      const errors = res.locals.classValidatorErrors;
-      res.locals.classValidatorErrors = errors ? errors.concat(result) : result;
+  ): Promise<void> => {
+    try {
+      const instance = plainToInstance(classType, req[field]);
+      const result = await validate(instance, {
+        skipMissingProperties: isPartial,
+      });
+      if (result.length > 0) {
+        const errors = res.locals.classValidatorErrors;
+        res.locals.classValidatorErrors = errors
+          ? errors.concat(result)
+          : result;
+      }
+      req[field] = instance; // Remove extra fields
+      next();
+    } catch (err) {
+      next(err);
     }
-    req[field] = instance; // Remove extra fields
-    next();
   };
 }
 
@@ -53,8 +57,9 @@ function validateObjectByClass<T extends object>(
  * Most commonly used for POST requests.
  * @param classType The class to validate the request body against
  */
-const validateBody = <T extends object>(classType: ClassType<T>) =>
-  validateObjectByClass<T>(classType, false, "body");
+const validateBody = <T extends object>(
+  classType: ClassType<T>
+): RequestHandler => validateObjectByClass<T>(classType, false, "body");
 
 /**
  * Returns a request handler that validates the request body against a class
@@ -62,8 +67,9 @@ const validateBody = <T extends object>(classType: ClassType<T>) =>
  * Most commonly used for PUT/PATCH requests.
  * @param classType The class to validate the request body against
  */
-const validatePartialBody = <T extends object>(classType: ClassType<T>) =>
-  validateObjectByClass<T>(classType, true, "body");
+const validatePartialBody = <T extends object>(
+  classType: ClassType<T>
+): RequestHandler => validateObjectByClass<T>(classType, true, "body");
 
 /**
  * Returns a request handler that validates the file on the request object
@@ -75,49 +81,72 @@ const validateFile = <T extends object>(classType: ClassType<T>) =>
 
 /**
  * Returns a request handler that validates a path param as a MongoDB ID.
- * @param paramName Name of the path param to be validated
+ * @param paramName Name of the path param to be validated (default is "id").
  */
-const validateId = (paramName: string): RequestHandler =>
+const validateId = (paramName: string = "id"): RequestHandler =>
   param(paramName)
     .isMongoId()
     .withMessage(`Path parameter ${paramName} is not a valid MongoID`);
 
+const formatExpressError = (
+  error: ExpressValidationError
+): IValidationError => ({
+  type: "validation",
+  loc: error.type === "field" ? error.location : "other",
+  field: error.type === "field" ? error.path : "no_field",
+  details: error.msg,
+});
+
 /**
  * Formats the `express-validator` validation result to the custom `ValidationError` type.
  */
-const formattedValidationResult = validationResult.withDefaults({
-  formatter: (error) =>
-    ({
-      type: "validation",
-      loc: error.type === "field" ? error.location : "other",
-      field: error.type === "field" ? error.path : "no_field",
-      details: error.msg,
-    } as IValidationError),
+const formatExpressErrors = (
+  expressErrors: ExpressValidationError[]
+): IValidationError[] => {
+  const newErrors: IValidationError[] = [];
+
+  for (const err of expressErrors) {
+    if (err.type === "alternative_grouped" || err.type === "alternative") {
+      newErrors.push(...err.nestedErrors.flat().map(formatExpressError));
+    } else {
+      newErrors.push(formatExpressError(err));
+    }
+  }
+
+  return newErrors;
+};
+
+const formatClassError = (
+  error: ClassValidationError,
+  message: string
+): IValidationError => ({
+  type: "validation",
+  loc: error.target instanceof FileValidator ? "file" : "body",
+  field: error.property,
+  details: message,
 });
 
 /**
  * Formats the class validation errors to the custom `IValidationError` type.
  */
 function formatClassErrors(
-  classErrors: ClassValidationError[],
+  classErrors: ClassValidationError[]
 ): IValidationError[] {
-  // use flatMap to handle nested errors
-  return classErrors.flatMap((error) =>
-      // If there are no children, add the error
-      error.children === undefined || error.children.length === 0
-        // Map the constraints to a list of validation errors
-        ? Object.values(error.constraints ?? {}).map(
-            (msg) =>
-              ({
-                type: "validation",
-                loc: "body",
-                field: error.property,
-                details: msg,
-              } as IValidationError)
-          )
-        // If there are children, recursively add the children
-        : formatClassErrors(error.children)
-    )
+  const newErrors: IValidationError[] = [];
+
+  for (const err of classErrors.flat()) {
+    if (err.children === undefined || err.children.length === 0) {
+      newErrors.push(
+        ...Object.values(err.constraints ?? {}).map((msg) =>
+          formatClassError(err, msg)
+        )
+      );
+    } else {
+      newErrors.push(...formatClassErrors(err.children));
+    }
+  }
+
+  return newErrors;
 }
 
 /**
@@ -125,8 +154,12 @@ function formatClassErrors(
  * If there are, it sends a response with status 400 and the errors.
  */
 function endValidation(req: Request, res: Response, next: NextFunction): any {
-  const expressValidatorErrors = formattedValidationResult(req).array();
-  const classValidatorErrors = formatClassErrors(res.locals.classValidatorErrors ?? [])
+  const expressValidatorErrors = formatExpressErrors(
+    validationResult(req).array()
+  );
+  const classValidatorErrors = formatClassErrors(
+    res.locals.classValidatorErrors ?? []
+  );
   const errors = [...expressValidatorErrors, ...classValidatorErrors];
   if (errors.length > 0) {
     return res.status(400).json({
@@ -155,4 +188,5 @@ export {
   validatePartialBody,
   validateId,
   validateFile,
+  formatClassErrors,
 };
