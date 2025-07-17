@@ -1,16 +1,14 @@
 import { IApiError } from "@/types/errors";
 
-interface ResponseBody {
-  status: "success" | "error";
-}
+type ResponseBody<T = unknown> = SuccessResponseBody<T> | ErrorResponseBody;
 
-interface SuccessResponseBody<T = unknown> extends ResponseBody {
+interface SuccessResponseBody<T = unknown> {
   status: "success";
   data: T;
   message: string;
 }
 
-interface ErrorResponseBody extends ResponseBody {
+interface ErrorResponseBody {
   status: "error";
   errors: IApiError[];
 }

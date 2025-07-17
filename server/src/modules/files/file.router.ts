@@ -1,11 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
-import {
-  FileModel,
-  FileValidator,
-  FileController,
-  FileService,
-} from "@/modules/files";
+import { FileController } from "./file.controller";
+import { FileValidator } from "./utils/file.validator";
 import {
   validateFile,
   validateId,
@@ -14,8 +10,7 @@ import {
 import { authenticate } from "@/utils/authentication";
 
 const fileRouter = Router();
-const fileService = new FileService(FileModel);
-const fileController = new FileController(fileService);
+const fileController = new FileController();
 const upload = multer();
 
 fileRouter.use(authenticate);
