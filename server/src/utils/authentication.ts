@@ -29,7 +29,7 @@ async function authenticate(
   
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
     } catch (error) {
       throw new UnauthorizedError("Unauthorized token");
     }

@@ -110,8 +110,8 @@ class AuthService {
       throw new UnauthorizedError("Invalid refresh token");
     }
 
-    const accessToken = jwt.sign({ email, id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
+    const accessToken = jwt.sign({ email, id }, process.env.ACCESS_TOKEN_SECRET!, {
+      expiresIn: "15m",
     });
     return accessToken;
   }
