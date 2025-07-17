@@ -67,8 +67,9 @@ userRouter.delete(
 
 userRouter.post(
   "/:id/files",
+  validation(validateId("id")),
   upload.single("file"),
-  validation(validateId("id"), validateFile(FileValidator)),
+  validation(validateFile(FileValidator)),
   userController.addFile
 );
 

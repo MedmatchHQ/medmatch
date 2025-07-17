@@ -1,5 +1,5 @@
 import MaxBufferSize from "@/utils/maxBufferSize";
-import { IsString, IsNotEmpty, IsIn } from "class-validator";
+import { IsString, IsNotEmpty, IsIn, IsDefined } from "class-validator";
 
 class FileValidator {
   @IsString()
@@ -10,7 +10,7 @@ class FileValidator {
   @IsIn(["image/jpeg", "image/png", "application/pdf"])
   mimetype!: string;
 
-  @IsNotEmpty()
+  @IsDefined()
   @MaxBufferSize(5)
   buffer!: Buffer;
 }
