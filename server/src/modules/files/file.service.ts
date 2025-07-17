@@ -1,6 +1,6 @@
-import { File, FileDoc, FileModel, FileSchema } from "@/modules/files";
+import { File, FileDoc, FileModel, FileSchema } from "./file.model";
 import { Model } from "mongoose";
-import { FileNotFoundError } from "@/modules/files/utils/file.errors";
+import { FileNotFoundError } from "./utils/file.errors";
 
 class FileService {
   constructor(private fileModel: Model<FileSchema> = FileModel) {}

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
-import { FileValidator, FileController } from "@/modules/files";
+import { FileController } from "./file.controller";
+import { FileValidator } from "./utils/file.validator";
 import {
   validateFile,
   validateId,

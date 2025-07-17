@@ -1,4 +1,5 @@
-import { FileService, File } from "@/modules/files/";
+import { FileService } from "./file.service";
+import { File } from "./file.model";
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
 
