@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${nunito_sans.variable} antialiased`}>
       <AuthProvider>
         <Navbar />
-        <div className="mx-4 md:mx-8 lg:mx-16 xl:mx-24">{children}</div>
+        <div className="">{children}</div>
       </AuthProvider>
       </body>
     </html>
