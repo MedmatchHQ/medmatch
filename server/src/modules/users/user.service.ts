@@ -1,6 +1,5 @@
 import {
   UserNotFoundError,
-  UserConflictError,
   User,
   UserDoc,
   UnpopulatedUserDoc,
@@ -8,10 +7,8 @@ import {
   InputUser,
   UserModel,
 } from "@/modules/users";
-import { MongoError, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { FileConflictError, FileNotFoundError } from "@/modules/files";
-import { MongooseCode } from "@/types/errors";
-import bcrypt from "bcrypt";
 
 class UserService {
   constructor(private userModel: UserModelType = UserModel) {}
@@ -47,79 +44,55 @@ class UserService {
   }
 
   /**
-   * Retrieves a user by their email address with populated profile files.
-   * @param email The email address of the user
+   * Retrieves a user by their associated account ID with populated profile files.
+   * @param accountId The unique identifier of the account associated with the user
    * @returns The user object if found
-   * @throws A {@link UserNotFoundError} if the user with the specified email is not found
+   * @throws A {@link UserNotFoundError} if no user is associated with the specified account id
    */
-  async getUserByEmail(email: string): Promise<User> {
+  async getUserByAccount(accountId: string): Promise<User> {
     const doc = await this.userModel
-      .findOne<UserDoc>({ email })
+      .findOne<UserDoc>({ accountId })
       .populate("profile.files")
       .exec();
-      if (!doc) {
-        throw new UserNotFoundError(`User with email ${email} not found`);
-      }
-      return User.fromDoc(doc);
+    if (!doc) {
+      throw new UserNotFoundError(
+        `User with account id ${accountId} not found`
+      );
+    }
+    return User.fromDoc(doc);
   }
 
   /**
    * Creates a new user with the provided user data and hashed password.
    * @param userData User data used to create a new user
    * @returns The newly created user object with populated profile files
-   * @throws A {@link UserConflictError} if a user with the same email already exists
    */
   async createUser(userData: InputUser): Promise<User> {
-    try {
-      const user = new this.userModel({
-        ...userData,
-        password: await bcrypt.hash(userData.password, 10),
-      });
-      await user.save();
-      const populated: UserDoc = await user.populate("profile.files");
-      return User.fromDoc(populated);
-    } catch (error) {
-      if (
-        error instanceof MongoError &&
-        error.code === MongooseCode.DuplicateKey
-      ) {
-        throw new UserConflictError(
-          `User with email ${userData.email} already exists`
-        );
-      }
-      throw error;
-    }
+    const user = new this.userModel(userData);
+    await user.save();
+    const populated: UserDoc = await user.populate("profile.files");
+    return User.fromDoc(populated);
   }
 
   /**
-   * Updates an existing user with the provided data, hashing password if included.
+   * Updates an existing user with the provided data
    * @param userId The unique identifier of the user to update
    * @param userData Partial user data to update
    * @returns The updated user object with populated profile files
    * @throws A {@link UserNotFoundError} if the user with the specified id is not found
-   * @throws A {@link UserConflictError} if the email update conflicts with an existing user
    */
-  async updateUser(userId: string, userData: Partial<InputUser>): Promise<User> {
-    try {
-      if (userData.password) {
-        userData.password = await bcrypt.hash(userData.password, 10);
-      }
-      const doc = await this.userModel
-        .findByIdAndUpdate<UserDoc>(userId, userData, { new: true })
-        .populate("profile.files")
-        .exec();
-      if (!doc) {
-        throw new UserNotFoundError(`User with id ${userId} not found`);
-      }
-      return User.fromDoc(doc);
-    } catch (error) {
-      if (error instanceof MongoError && error.code === 11000) {
-        throw new UserConflictError(
-          `User with email ${userData.email} already exists`
-        );
-      }
-      throw error;
+  async updateUser(
+    userId: string,
+    userData: Partial<InputUser>
+  ): Promise<User> {
+    const doc = await this.userModel
+      .findByIdAndUpdate<UserDoc>(userId, userData, { new: true })
+      .populate("profile.files")
+      .exec();
+    if (!doc) {
+      throw new UserNotFoundError(`User with id ${userId} not found`);
     }
+    return User.fromDoc(doc);
   }
 
   /**

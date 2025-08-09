@@ -1,62 +1,93 @@
 import bcrypt from "bcrypt";
 import {
-  UserService,
-  User,
-  InputUser,
-  UserNotFoundError,
-  UserConflictError,
-} from "@/modules/users";
+  Account,
+  AccountModel,
+  CreateAccountInput,
+  AccountConflictError,
+  AccountSchema,
+} from "@/modules/auth";
 import { UnauthorizedError } from "@/types/errors";
+import { MongoError } from "mongodb";
+import { MongooseCode } from "@/types/errors";
 import jwt from "jsonwebtoken";
+import { Model } from "mongoose";
+import {
+  StudentProfile,
+  StudentProfileModel,
+  StudentProfileDoc,
+} from "@/modules/users/student-profile.model";
+import { StudentProfileNotFoundError } from "@/modules/users/utils/student-profile.errors";
+import {
+  ProfessionalProfile,
+  ProfessionalProfileModel,
+  ProfessionalProfileDoc,
+} from "@/modules/professional-profiles/professional-profile.model";
+import { ProfessionalProfileNotFoundError } from "@/modules/professional-profiles/utils/professional-profile.errors";
 
 /**
  * Handles authentication-related business logic such as login, signup,
  * and token generation.
  */
 class AuthService {
-  constructor(private userService: UserService) {}
-
   // Note: All methods should throw an ambiguous UnauthorizedError for security purposes.
 
+  constructor(private accountModel: Model<AccountSchema> = AccountModel) {}
+
   /**
-   * Verfies a user email exists and the password matches the hash.
-   * @param email User email
-   * @param password User password
-   * @returns The user object if login is successful
-   * @throws An {@link UnauthorizedError} if the user is not found or the password is incorrect
+   * Verifies an account email exists and the password matches the hash.
+   * @param email Account email
+   * @param password Account password
+   * @returns The account object if login is successful
+   * @throws An {@link UnauthorizedError} if the account is not found or the password is incorrect
    */
-  async login(email: string, password: string): Promise<User> {
-    let user: User;
-    try {
-      user = await this.userService.getUserByEmail(email);
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        throw new UnauthorizedError("Invalid email or password");
-      }
-      throw error;
+  async login(email: string, password: string): Promise<Account> {
+    const accountDoc = await this.accountModel.findOne({ email });
+    if (!accountDoc) {
+      throw new UnauthorizedError("Invalid email or password");
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, accountDoc.password);
     if (!isPasswordValid) {
       throw new UnauthorizedError("Invalid email or password");
     }
-    return user;
+
+    return Account.fromDoc(accountDoc);
   }
 
   /**
-   * Creates a new user based on the provided user data.
-   * @param userData Partial {@link InputUser} user data (no ids, unpopulated files) used to create a new user
-   * @returns The newly created user object
-   * @throws A {@link UserConflictError} if the user already exists
-   * @note This is just a wrapper around {@link UserService.createUser}
+   * Creates a new account based on the provided data.
+   * @param data Signup data containing account information
+   * @returns The newly created account object
+   * @throws An {@link AccountConflictError} if an account with the email already exists
    */
-  async signup(userData: InputUser): Promise<User> {
-    return this.userService.createUser(userData);
+  async signup(data: CreateAccountInput): Promise<Account> {
+    const { email, password } = data;
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const accountData: CreateAccountInput = {
+        email,
+        password: hashedPassword,
+      };
+
+      const accountDoc = new this.accountModel(accountData);
+      await accountDoc.save();
+      return Account.fromDoc(accountDoc);
+    } catch (error) {
+      if (
+        error instanceof MongoError &&
+        error.code === MongooseCode.DuplicateKey
+      ) {
+        throw new AccountConflictError(
+          `Account with email ${email} already exists`
+        );
+      }
+      throw error;
+    }
   }
 
   /**
    * Generates a refresh token with email and id payload. This function expects the email and id to be valid.
-   * @param email User email
-   * @param id User id
+   * @param email Account email
+   * @param id Account id
    * @returns The generated refresh token
    * @throws No errors
    */
@@ -72,12 +103,12 @@ class AuthService {
 
   /**
    * Generates an access token with email and id payload, given a valid refresh token.
-   * The refresh token must be valid, not expired, and associated with an existing user.
+   * The refresh token must be valid, not expired, and associated with an existing account.
    * @param refreshToken The refresh token to verify
    * @returns An access token on success
    * @throws An {@link UnauthorizedError} if the refresh token is invalid or expired
    * @throws An {@link UnauthorizedError} if the refresh token payload does not contain `email` and `id`
-   * @throws An {@link UnauthorizedError} if the user associated with the token does not exist
+   * @throws An {@link UnauthorizedError} if the account associated with the token does not exist
    */
   async generateAccessToken(refreshToken: string): Promise<string> {
     let decoded: any;
@@ -104,19 +135,15 @@ class AuthService {
 
     const { email, id } = decoded as { email: string; id: string };
 
-    let user: User;
-    try {
-      user = await this.userService.getUserById(id);
-    } catch (error) {
-      if (error instanceof UserNotFoundError) {
-        // User associated with token should exist
-        throw new UnauthorizedError("Invalid refresh token");
-      }
-      throw error;
+    const accountDoc = await this.accountModel.findOne({ email });
+    if (!accountDoc) {
+      // Account associated with token should exist
+      throw new UnauthorizedError("Invalid refresh token");
     }
+    const account = Account.fromDoc(accountDoc);
 
-    if (user.email !== email) {
-      // User email should match the token payload
+    if (account.id !== id) {
+      // Account ID should match the token payload
       throw new UnauthorizedError("Invalid refresh token");
     }
 
@@ -128,6 +155,46 @@ class AuthService {
       }
     );
     return accessToken;
+  }
+
+  /**
+   * Retrieves a student profile by their associated account ID with populated files.
+   * @param accountId The unique identifier of the account associated with the student profile
+   * @returns The student profile object if found
+   * @throws A {@link StudentProfileNotFoundError} if no student profile is associated with the specified account id
+   */
+  async getStudentProfile(accountId: string): Promise<StudentProfile> {
+    const doc = await StudentProfileModel.findOne<StudentProfileDoc>({
+      accountId,
+    })
+      .populate(["picture", "resume"])
+      .exec();
+    if (!doc) {
+      throw new StudentProfileNotFoundError(
+        `Student profile with account id ${accountId} not found`
+      );
+    }
+    return StudentProfile.fromDoc(doc);
+  }
+
+  /**
+   * Retrieves a professional profile by their associated account ID.
+   * @param accountId The unique identifier of the account associated with the professional profile
+   * @returns The professional profile object if found
+   * @throws A {@link ProfessionalProfileNotFoundError} if no professional profile is associated with the specified account id
+   */
+  async getProfessionalProfile(
+    accountId: string
+  ): Promise<ProfessionalProfile> {
+    const doc = await ProfessionalProfileModel.findOne<ProfessionalProfileDoc>({
+      accountId,
+    }).exec();
+    if (!doc) {
+      throw new ProfessionalProfileNotFoundError(
+        `Professional profile with account id ${accountId} not found`
+      );
+    }
+    return ProfessionalProfile.fromDoc(doc);
   }
 }
 

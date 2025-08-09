@@ -20,11 +20,8 @@ const profileSchema = new Schema({
 const userSchema = new Schema({
   first: { type: String, required: true },
   last: { type: String, required: true },
-  // lowercase email to ensure case insensitive uniqueness
-  email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
   profile: { type: profileSchema, default: () => ({}) },
-  isEmployer: { type: Boolean, required: true },
+  accountId: { type: Schema.Types.ObjectId, ref: "Account", required: true },
   entryDate: { type: Date, default: () => Date.now() },
 });
 
@@ -83,7 +80,7 @@ type UserSchema = InferSchemaType<typeof userSchema>;
  * An input object used when creating a user.
  * There is no id for the user or profile, and the files are an array of string ObjectIds.
  */
-interface InputUser extends Replace<UserSchema, { profile: InputProfile }> {}
+type InputUser = Replace<Omit<UserSchema, "entryDate">, { profile: InputProfile }>;
 
 /** The user document with unpopulated `profile.files` field returned by a mongoose query. */
 interface UnpopulatedUserDoc extends HydratedDocument<UserSchema> {}
@@ -92,19 +89,16 @@ interface UnpopulatedUserDoc extends HydratedDocument<UserSchema> {}
  * The user document with populated `profile.files` field return by a mongoose query
  * followed by a `populate` call
  * */
-interface UserDoc
-  extends Replace<UnpopulatedUserDoc, { profile: ProfileDoc }> {}
+type UserDoc = Replace<UnpopulatedUserDoc, { profile: ProfileDoc }>;
 
 /** The base level populated user object to be returned by the API */
-class User implements Replace<UserSchema, { profile: Profile }> {
+class User implements Replace<UserSchema, { profile: Profile, accountId: string }> {
   constructor(
     public id: string,
     public first: string,
     public last: string,
-    public email: string,
-    public password: string,
     public profile: Profile,
-    public isEmployer: boolean,
+    public accountId: string,
     public entryDate: Date
   ) {}
 
@@ -114,10 +108,8 @@ class User implements Replace<UserSchema, { profile: Profile }> {
       doc._id.toString(),
       doc.first,
       doc.last,
-      doc.email,
-      doc.password,
       Profile.fromDoc(doc.profile),
-      doc.isEmployer,
+      doc.accountId.toString(),
       doc.entryDate
     );
   }

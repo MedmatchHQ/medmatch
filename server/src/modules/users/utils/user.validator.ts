@@ -2,9 +2,6 @@ import { Transform, Type } from "class-transformer";
 import {
   IsString,
   IsNotEmpty,
-  IsEmail,
-  IsBoolean,
-  IsDate,
   ValidateNested,
   IsOptional,
   IsISO8601,
@@ -36,17 +33,6 @@ class UserValidator {
   @IsString()
   @IsNotEmpty()
   last!: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password!: string;
-
-  @IsBoolean()
-  isEmployer!: boolean;
 
   @IsISO8601()
   @IsOptional()
