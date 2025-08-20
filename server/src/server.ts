@@ -7,11 +7,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fileRouter } from "@/modules/files";
-import { userRouter } from "@/modules/users";
 import { errorHandler } from "@/utils/errorHandler";
 import { authRouter } from "@/modules/auth";
 import { professionalProfileRouter } from "@/modules/professional-profiles";
-import { studentProfileRouter } from "@/modules/users/student-profile.router";
+import { studentProfileRouter } from "@/modules/student-profiles/student-profile.router";
 
 // Express configuration
 const app = express();
@@ -52,7 +51,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/accounts", authRouter);
 app.use("/api/files", fileRouter);
-app.use("/api/users", userRouter);
 app.use("/api/student-profiles", studentProfileRouter);
 app.use("/api/professional-profiles", professionalProfileRouter);
 

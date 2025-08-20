@@ -15,8 +15,8 @@ import {
   StudentProfile,
   StudentProfileModel,
   StudentProfileDoc,
-} from "@/modules/users/student-profile.model";
-import { StudentProfileNotFoundError } from "@/modules/users/utils/student-profile.errors";
+} from "@/modules/student-profiles/student-profile.model";
+import { StudentProfileNotFoundError } from "@/modules/student-profiles/utils/student-profile.errors";
 import {
   ProfessionalProfile,
   ProfessionalProfileModel,

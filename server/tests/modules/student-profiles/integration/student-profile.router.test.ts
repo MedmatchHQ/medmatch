@@ -17,11 +17,11 @@ import { Types } from "mongoose";
 import {
   StudentProfileNotFoundError,
   ExperienceNotFoundError,
-} from "@/modules/users/utils/student-profile.errors";
+} from "@/modules/student-profiles/utils/student-profile.errors";
 import {
   StudentProfileModel,
   StudentProfile,
-} from "@/modules/users/student-profile.model";
+} from "@/modules/student-profiles/student-profile.model";
 import { expectValidationErrors } from "#/utils/validation";
 import { FileModel } from "@/modules/files/file.model";
 
@@ -54,7 +54,7 @@ describe("Student Profile Router", () => {
     it("should return an empty list when there are no student profiles", async () => {
       const response = await agent.get("/api/student-profiles");
 
-      await expectSuccessResponse(response);
+      expectSuccessResponse(response);
       expect(response.body.data).toEqual([]);
     });
 
@@ -63,11 +63,7 @@ describe("Student Profile Router", () => {
 
       const response = await agent.get("/api/student-profiles");
 
-      await expectSuccessResponse(
-        response,
-        [TestStudentProfileValidator],
-        [profile]
-      );
+      expectSuccessResponse(response, [TestStudentProfileValidator], [profile]);
     });
   });
 
@@ -77,11 +73,7 @@ describe("Student Profile Router", () => {
 
       const response = await agent.get(`/api/student-profiles/${profile.id}`);
 
-      await expectSuccessResponse(
-        response,
-        TestStudentProfileValidator,
-        profile
-      );
+      expectSuccessResponse(response, TestStudentProfileValidator, profile);
     });
 
     it("should return an error for student profile not found", async () => {
@@ -90,7 +82,7 @@ describe("Student Profile Router", () => {
 
       const response = await agent.get(`/api/student-profiles/${badId}`);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -113,7 +105,7 @@ describe("Student Profile Router", () => {
       const profile = await StudentProfileModel.findById(response.body.data.id);
       expect(profile).toBeDefined();
       await profile!.populate(["picture", "resume"]);
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestStudentProfileValidator,
         StudentProfile.fromDoc(profile! as any),
@@ -172,7 +164,7 @@ describe("Student Profile Router", () => {
         .patch(`/api/student-profiles/${profile.id}`)
         .send(updateData);
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.firstName).toBe(updateData.firstName);
       expect(response.body.data.about).toBe(updateData.about);
 
@@ -190,7 +182,7 @@ describe("Student Profile Router", () => {
         .patch(`/api/student-profiles/${badId}`)
         .send(updateData);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -224,11 +216,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile1.id}`
       );
 
-      await expectSuccessResponse(
-        response,
-        TestStudentProfileValidator,
-        profile1
-      );
+      expectSuccessResponse(response, TestStudentProfileValidator, profile1);
       const profiles = await StudentProfileModel.find();
       expect(profiles.length).toBe(1);
       expect(profiles[0].id).toEqual(profile2.id);
@@ -239,7 +227,7 @@ describe("Student Profile Router", () => {
 
       const response = await agent.delete(`/api/student-profiles/${badId}`);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -262,7 +250,7 @@ describe("Student Profile Router", () => {
           contentType: "image/jpeg",
         });
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.picture).toBeDefined();
       expect(response.body.data.picture.name).toBe("profile_picture.jpg");
 
@@ -284,7 +272,7 @@ describe("Student Profile Router", () => {
           contentType: "image/jpeg",
         });
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -337,7 +325,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/picture`
       );
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.picture).toBeNull();
     });
 
@@ -348,7 +336,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${badId}/picture`
       );
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -371,7 +359,7 @@ describe("Student Profile Router", () => {
           contentType: "application/pdf",
         });
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.resume).toBeDefined();
       expect(response.body.data.resume.name).toBe("resume.pdf");
 
@@ -391,7 +379,7 @@ describe("Student Profile Router", () => {
           contentType: "application/pdf",
         });
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -430,7 +418,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/resume`
       );
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.resume).toBeNull();
     });
 
@@ -441,7 +429,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${badId}/resume`
       );
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -466,7 +454,7 @@ describe("Student Profile Router", () => {
         .post(`/api/student-profiles/${profile.id}/experiences`)
         .send(experienceData);
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.experiences).toHaveLength(1);
       expect(response.body.data.experiences[0].jobTitle).toBe(
         experienceData.jobTitle
@@ -487,7 +475,7 @@ describe("Student Profile Router", () => {
         .post(`/api/student-profiles/${badId}/experiences`)
         .send(experienceData);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -554,7 +542,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/experiences/${experienceId}`
       );
 
-      await expectSuccessResponse(response, TestStudentProfileValidator);
+      expectSuccessResponse(response, TestStudentProfileValidator);
       expect(response.body.data.experiences).toHaveLength(0);
     });
 
@@ -566,7 +554,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${badId}/experiences/${experienceId}`
       );
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new StudentProfileNotFoundError(
@@ -584,7 +572,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/experiences/${badExperienceId}`
       );
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           new ExperienceNotFoundError(

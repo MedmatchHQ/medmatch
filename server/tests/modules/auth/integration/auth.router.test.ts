@@ -9,7 +9,7 @@ import {
   expectSuccessResponse,
 } from "#/utils/helpers";
 import { TestAccountValidator } from "#/modules/auth/utils/account.validators";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { UnauthorizedError } from "@/types/errors";
 import { Account, AccountModel } from "@/modules/auth/auth.model";
 import { AccountConflictError } from "@/modules/auth/utils/auth.errors";
@@ -20,12 +20,31 @@ import { TestProfessionalProfileValidator } from "#/modules/professional-profile
 import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
 import TestAgent from "supertest/lib/agent";
 
-function getAccessToken(account: { email: string; id: string }) {
-  return jwt.sign(
-    { email: account.email, id: account.id },
-    process.env.ACCESS_TOKEN_SECRET!,
-    { expiresIn: "15m" }
-  );
+const SEVEN_DAYS_IN_SECONDS = 604800;
+const FIFTEEN_MINUTES_IN_SECONDS = 900;
+
+function expectValidToken(
+  token: string,
+  account: { email: string; id: string },
+  type: "refresh" | "access"
+) {
+  const secret =
+    type === "refresh"
+      ? process.env.REFRESH_TOKEN_SECRET!
+      : process.env.ACCESS_TOKEN_SECRET!;
+
+  const expirationInSeconds =
+    type === "refresh" ? SEVEN_DAYS_IN_SECONDS : FIFTEEN_MINUTES_IN_SECONDS;
+
+  expect(token).toBeDefined();
+  const decoded = jwt.verify(token, secret) as JwtPayload;
+  expect(decoded).toMatchObject({
+    email: account.email,
+    id: account.id,
+    exp: expect.any(Number),
+    iat: expect.any(Number),
+  });
+  expect(decoded.exp! - decoded.iat!).toBeCloseTo(expirationInSeconds, -1);
 }
 
 function getRefreshToken(account: { email: string; id: string }) {
@@ -45,29 +64,30 @@ describe("Auth Router", () => {
 
   describe("POST /login", () => {
     it("should log the account in and return account data with tokens", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
       const account = await createTestAccount(accountData);
 
       const response = await request(app)
         .post("/api/accounts/login")
         .send({ email: accountData.email, password: accountData.password });
 
-      await expectSuccessResponse(response, TestAccountValidator, {
-        ...account,
-        accessToken: getAccessToken(account),
-        refreshToken: getRefreshToken(account),
-      });
+      expectSuccessResponse(response, TestAccountValidator, account);
+
+      const { refreshToken, accessToken } = response.body.data;
+
+      expectValidToken(refreshToken, account, "refresh");
+      expectValidToken(accessToken, account, "access");
     });
 
     it("should set the refreshToken cookie on success", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
       const account = await createTestAccount(accountData);
 
       const response = await request(app)
         .post("/api/accounts/login")
         .send({ email: accountData.email, password: accountData.password });
 
-      await expectSuccessResponse(response);
+      expectSuccessResponse(response);
       const cookies = response.get("Set-Cookie");
 
       const refreshTokenCookie = cookies?.find((cookie: string) =>
@@ -78,11 +98,13 @@ describe("Auth Router", () => {
       const refreshTokenValue = refreshTokenCookie
         ?.split("refreshToken=")[1]
         ?.split(";")[0];
-      expect(refreshTokenValue).toEqual(getRefreshToken(account));
+
+      expect(refreshTokenValue).toBeDefined();
+      expectValidToken(refreshTokenValue!, account, "refresh");
     });
 
     it("should return Unauthorized for account not found", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
       await createTestAccount(accountData);
 
       const response = await request(app).post("/api/accounts/login").send({
@@ -90,14 +112,14 @@ describe("Auth Router", () => {
         password: accountData.password,
       });
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 401,
         errors: [new UnauthorizedError("Invalid email or password")],
       });
     });
 
     it("should return Unauthorized for incorrect password", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
       await createTestAccount(accountData);
 
       const response = await request(app).post("/api/accounts/login").send({
@@ -105,7 +127,7 @@ describe("Auth Router", () => {
         password: "wrong password",
       });
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 401,
         errors: [new UnauthorizedError("Invalid email or password")],
       });
@@ -114,7 +136,7 @@ describe("Auth Router", () => {
 
   describe("POST /signup", () => {
     it("should create a new account", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
 
       const response = await request(app)
         .post("/api/accounts/signup")
@@ -122,7 +144,7 @@ describe("Auth Router", () => {
 
       const account = await AccountModel.findById(response.body.data.id);
       expect(account).toBeDefined();
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestAccountValidator,
         Account.fromDoc(account!),
@@ -134,7 +156,7 @@ describe("Auth Router", () => {
 
     it("should return an error for duplicate email", async () => {
       const account = await createTestAccount();
-      const newData = await getAccountData();
+      const newData = getAccountData();
       const duplicateEmailData = {
         ...newData,
         email: account.email.toUpperCase(),
@@ -144,7 +166,7 @@ describe("Auth Router", () => {
         .post("/api/accounts/signup")
         .send(duplicateEmailData);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 409,
         errors: [
           new AccountConflictError(
@@ -155,7 +177,7 @@ describe("Auth Router", () => {
     });
 
     it("should hash the password", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
 
       const response = await request(app)
         .post("/api/accounts/signup")
@@ -169,7 +191,7 @@ describe("Auth Router", () => {
 
   describe("POST /logout", () => {
     it("should remove the refreshToken cookie", async () => {
-      const accountData = await getAccountData();
+      const accountData = getAccountData();
       await createTestAccount(accountData);
 
       const loginRes = await request(app)
@@ -186,7 +208,7 @@ describe("Auth Router", () => {
         .post("/api/accounts/logout")
         .set("Cookie", refreshTokenCookie!);
 
-      await expectSuccessResponse(logoutRes);
+      expectSuccessResponse(logoutRes);
 
       const logoutCookies = logoutRes.get("Set-Cookie");
       const clearedCookie = logoutCookies?.find((cookie: string) =>
@@ -207,10 +229,10 @@ describe("Auth Router", () => {
           .post("/api/accounts/token")
           .set("Cookie", `refreshToken=${refreshToken}`);
 
-        await expectSuccessResponse(response, undefined, {
-          accessToken: getAccessToken(account),
+        expectSuccessResponse(response, undefined, {
           refreshToken: refreshToken,
         });
+        expectValidToken(response.body.data.accessToken, account, "access");
       });
 
       it("should return Unauthorized for an invalid refresh token", async () => {
@@ -218,7 +240,7 @@ describe("Auth Router", () => {
           .post("/api/accounts/token")
           .set("Cookie", `refreshToken=invalidtoken`);
 
-        await expectHttpErrorResponse(response, {
+        expectHttpErrorResponse(response, {
           status: 401,
           errors: [new UnauthorizedError("Invalid refresh token")],
         });
@@ -234,10 +256,10 @@ describe("Auth Router", () => {
           .post("/api/accounts/token")
           .send({ refreshToken });
 
-        await expectSuccessResponse(response, undefined, {
-          accessToken: getAccessToken(account),
+        expectSuccessResponse(response, undefined, {
           refreshToken: refreshToken,
         });
+        expectValidToken(response.body.data.accessToken, account, "access");
       });
 
       it("should return Unauthorized for an invalid refresh token", async () => {
@@ -245,7 +267,7 @@ describe("Auth Router", () => {
           .post("/api/accounts/token")
           .send({ refreshToken: "invalid token" });
 
-        await expectHttpErrorResponse(response, {
+        expectHttpErrorResponse(response, {
           status: 401,
           errors: [new UnauthorizedError("Invalid refresh token")],
         });
@@ -261,7 +283,7 @@ describe("Auth Router", () => {
         `/api/accounts/${studentProfile.accountId}/student-profile`
       );
 
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestStudentProfileValidator,
         studentProfile
@@ -297,7 +319,7 @@ describe("Auth Router", () => {
         `/api/accounts/${professionalProfile.accountId}/professional-profile`
       );
 
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestProfessionalProfileValidator,
         professionalProfile

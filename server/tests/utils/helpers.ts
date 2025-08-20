@@ -20,7 +20,7 @@ import { HttpError } from "@/types/errors";
  * @param overrides.contentHeader - The expected content-type header (default is "application/json; charset=utf-8").
  * @template T - The class type of the data validator.
  */
-async function expectSuccessResponse<T extends ClassType<object>>(
+function expectSuccessResponse<T extends ClassType<object>>(
   response: SupertestResponse,
   dataValidator?: T | [T],
   data?: any,
@@ -54,7 +54,7 @@ async function expectSuccessResponse<T extends ClassType<object>>(
     validator = SuccessBodyValidator.withData(dataValidator);
   }
 
-  await expectMatch(validator, response.body);
+  expectMatch(validator, response.body);
 
   expect(response.body.message).toEqual(message);
 }
@@ -67,7 +67,7 @@ async function expectSuccessResponse<T extends ClassType<object>>(
  * @param options.contentHeader - The expected `Content-Type` header value. Defaults to `"application/json; charset=utf-8"`.
  * @param options.errors - An array of partial `HttpError` objects representing the expected errors in the response body. Only included fields will be checked.
  */
-async function expectHttpErrorResponse(
+function expectHttpErrorResponse(
   response: SupertestResponse,
   options: {
     status?: number;
@@ -83,7 +83,7 @@ async function expectHttpErrorResponse(
 
   expect(response.status).toBe(status);
   expect(response.headers["content-type"]).toBe(contentHeader);
-  await expectMatch(HttpErrorBodyValidator, response.body);
+  expectMatch(HttpErrorBodyValidator, response.body);
 
   if (errors !== undefined) {
     const { errors: responseErrors } = response.body;

@@ -44,7 +44,7 @@ describe("Professional Profile Router", () => {
     it("should return an empty list when there are no professional profiles", async () => {
       const response = await agent.get("/api/professional-profiles");
 
-      await expectSuccessResponse(response);
+      expectSuccessResponse(response);
       expect(response.body.data).toEqual([]);
     });
 
@@ -53,7 +53,7 @@ describe("Professional Profile Router", () => {
 
       const response = await agent.get("/api/professional-profiles");
 
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         [TestProfessionalProfileValidator],
         [profile]
@@ -69,7 +69,7 @@ describe("Professional Profile Router", () => {
         `/api/professional-profiles/${profile.id}`
       );
 
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestProfessionalProfileValidator,
         profile
@@ -82,7 +82,7 @@ describe("Professional Profile Router", () => {
 
       const response = await agent.get(`/api/professional-profiles/${badId}`);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           {
@@ -96,7 +96,7 @@ describe("Professional Profile Router", () => {
 
   describe("POST /", () => {
     it("should create a new professional profile", async () => {
-      const profileData = getProfessionalProfileData();
+      const profileData = await getProfessionalProfileData();
 
       const response = await agent
         .post("/api/professional-profiles")
@@ -107,7 +107,7 @@ describe("Professional Profile Router", () => {
         response.body.data.id
       );
       expect(profile).toBeDefined();
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestProfessionalProfileValidator,
         ProfessionalProfile.fromDoc(profile!),
@@ -143,11 +143,10 @@ describe("Professional Profile Router", () => {
         .patch(`/api/professional-profiles/${profile.id}`)
         .send(updateData);
 
-      await expectSuccessResponse(response, TestProfessionalProfileValidator);
+      expectSuccessResponse(response, TestProfessionalProfileValidator);
       expect(response.body.data.name).toBe(updateData.name);
       expect(response.body.data.about).toBe(updateData.about);
 
-      // Verify in database
       const updatedProfile = await ProfessionalProfileModel.findById(
         profile.id
       );
@@ -163,7 +162,7 @@ describe("Professional Profile Router", () => {
         .patch(`/api/professional-profiles/${badId}`)
         .send(updateData);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           {
@@ -184,14 +183,14 @@ describe("Professional Profile Router", () => {
         `/api/professional-profiles/${profile1.id}`
       );
 
-      await expectSuccessResponse(
+      expectSuccessResponse(
         response,
         TestProfessionalProfileValidator,
         profile1
       );
       const profiles = await ProfessionalProfileModel.find();
       expect(profiles.length).toBe(1);
-      expect(profiles[0].id).toEqual(profile2.id);
+      expect(profiles[0]!.id).toEqual(profile2.id);
     });
 
     it("should return an error for professional profile not found", async () => {
@@ -201,7 +200,7 @@ describe("Professional Profile Router", () => {
         `/api/professional-profiles/${badId}`
       );
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           {

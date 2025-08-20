@@ -4,7 +4,7 @@ import {
   StudentProfile,
   InputStudentProfile,
   StudentProfileDoc,
-} from "@/modules/users/student-profile.model";
+} from "@/modules/student-profiles/student-profile.model";
 
 const getStudentProfileData = async (): Promise<InputStudentProfile> => ({
   firstName: `Test Student ${Date.now()}`,
