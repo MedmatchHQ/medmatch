@@ -31,7 +31,7 @@ describe("File Service", () => {
       expect(files).toContainEqual<File>(file1);
       expect(files).toContainEqual<File>(file2);
       files.forEach((f) => expect(f).toBeInstanceOf(File));
-      files.forEach(async (f) => await expectMatch(TestFileValidator, f));
+      files.forEach(async (f) => expectMatch(TestFileValidator, f));
     });
   });
 
@@ -44,7 +44,7 @@ describe("File Service", () => {
 
       expect(foundFile).toEqual(file);
       expect(foundFile).toBeInstanceOf(File);
-      await expectMatch(TestFileValidator, foundFile);
+      expectMatch(TestFileValidator, foundFile);
     });
 
     it("should throw FileNotFoundError when file does not exist", async () => {
@@ -68,7 +68,7 @@ describe("File Service", () => {
       expect(createdFile.name).toBe(fileData.name);
       expect(createdFile.type).toBe(fileData.type);
       expect(createdFile.id).toBeDefined();
-      await expectMatch(TestFileValidator, createdFile);
+      expectMatch(TestFileValidator, createdFile);
     });
 
     it("should return the created file", async () => {
@@ -79,7 +79,7 @@ describe("File Service", () => {
       expect(createdFile.name).toBe(fileData.name);
       expect(createdFile.type).toBe(fileData.type);
       expect(createdFile.id).toBeDefined();
-      await expectMatch(TestFileValidator, createdFile);
+      expectMatch(TestFileValidator, createdFile);
     });
   });
 
@@ -103,7 +103,7 @@ describe("File Service", () => {
 
       expect(deletedFile).toEqual(file);
       expect(deletedFile).toBeInstanceOf(File);
-      await expectMatch(TestFileValidator, deletedFile);
+      expectMatch(TestFileValidator, deletedFile);
     });
 
     it("should throw FileNotFoundError when file does not exist", async () => {

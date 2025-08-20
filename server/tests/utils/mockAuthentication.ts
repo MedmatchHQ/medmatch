@@ -39,7 +39,7 @@ async function expectEndpointToRequireAuth(
   expect(response.headers["content-type"]).toBe(
     "application/json; charset=utf-8"
   );
-  await expectMatch(HttpErrorBodyValidator, response.body);
+  expectMatch(HttpErrorBodyValidator, response.body);
   expect(response.body.errors.length).toBe(1);
   const [error] = response.body.errors;
   expect(error.type).toEqual("http");
