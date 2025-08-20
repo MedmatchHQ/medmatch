@@ -15,6 +15,7 @@ To get started after cloning the repo, first install the necessary dependencies.
 The `client` and `server` folders are individual `npm` packages, so you will need to install the respective dependencies separately.  
 Run the following commands from the root folder.
 ```sh
+npm ci
 cd client
 npm ci
 cd ../server
