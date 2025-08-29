@@ -1,17 +1,15 @@
-import {
-  UserModel,
-  UserService,
-  UserValidator,
-} from "@/modules/users";
-import { AuthService, AuthController, CredentialsValidator } from "@/modules/auth";
+import { AuthController, CredentialsValidator } from "@/modules/auth";
 import { Router } from "express";
-import { validateBody, validation } from "@/utils/validationMiddleware";
+import {
+  validateBody,
+  validation,
+  validateId,
+} from "@/utils/validationMiddleware";
 import { cookie, oneOf, body } from "express-validator";
+import { authenticate } from "@/utils/authentication";
 
 const authRouter = Router();
-const userService = new UserService(UserModel);
-const authService = new AuthService(userService);
-const authController = new AuthController(authService);
+const authController = new AuthController();
 
 authRouter.post(
   "/login",
@@ -21,7 +19,7 @@ authRouter.post(
 
 authRouter.post(
   "/signup",
-  validation(validateBody(UserValidator)),
+  validation(validateBody(CredentialsValidator)),
   authController.signup
 );
 
@@ -40,6 +38,20 @@ authRouter.post(
     ])
   ),
   authController.generateAccessToken
+);
+
+authRouter.get(
+  "/:accountId/student-profile",
+  authenticate,
+  validation(validateId("accountId")),
+  authController.getStudentProfile
+);
+
+authRouter.get(
+  "/:accountId/professional-profile",
+  authenticate,
+  validation(validateId("accountId")),
+  authController.getProfessionalProfile
 );
 
 export { authRouter };

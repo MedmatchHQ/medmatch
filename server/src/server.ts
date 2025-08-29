@@ -7,9 +7,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { fileRouter } from "@/modules/files";
-import { userRouter } from "@/modules/users";
 import { errorHandler } from "@/utils/errorHandler";
 import { authRouter } from "@/modules/auth";
+import { professionalProfileRouter } from "@/modules/professional-profiles";
+import { studentProfileRouter } from "@/modules/student-profiles/student-profile.router";
 
 // Express configuration
 const app = express();
@@ -20,7 +21,7 @@ app.use(cookieParser());
 const corsOptions = {
   credentials: true,
   origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
@@ -34,7 +35,7 @@ async function connectDB() {
   const cluster = process.env.DB_CLUSTER;
 
   const uri = `${dialect}://${username}:${password}@${host}/${collection}?retryWrites=true&w=majority&appName=${cluster}`;
-  
+
   await mongoose.connect(uri);
   console.log("[database]: Connected");
 }
@@ -48,9 +49,10 @@ app.get("/", (req, res) => {
   res.status(200).send("Connected");
 });
 
-app.use("/api/auth", authRouter);
+app.use("/api/accounts", authRouter);
 app.use("/api/files", fileRouter);
-app.use("/api/users", userRouter);
+app.use("/api/student-profiles", studentProfileRouter);
+app.use("/api/professional-profiles", professionalProfileRouter);
 
 // Error handler must come last
 app.use(errorHandler);

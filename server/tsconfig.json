@@ -18,12 +18,6 @@
     },
     "types": ["node", "@types/jest"]
   },
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts",
-    "*.d.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "*.d.ts"],
+  "exclude": ["node_modules"]
 }

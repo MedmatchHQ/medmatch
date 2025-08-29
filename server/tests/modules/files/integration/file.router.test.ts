@@ -39,7 +39,7 @@ describe("File Router", () => {
     it("should return an empty list when there are no files", async () => {
       const response = await agent.get("/api/files");
 
-      await expectSuccessResponse(response);
+      expectSuccessResponse(response);
     });
 
     it("should return all files", async () => {
@@ -47,7 +47,7 @@ describe("File Router", () => {
 
       const response = await agent.get("/api/files");
 
-      await expectSuccessResponse(response, [TestFileValidator], [file]);
+      expectSuccessResponse(response, [TestFileValidator], [file]);
     });
   });
 
@@ -57,7 +57,7 @@ describe("File Router", () => {
 
       const response = await agent.get(`/api/files/${file.id}`);
 
-      await expectSuccessResponse(response, TestFileValidator, file);
+      expectSuccessResponse(response, TestFileValidator, file);
     });
 
     it("should return an error for file not found", async () => {
@@ -66,7 +66,7 @@ describe("File Router", () => {
 
       const response = await agent.get(`/api/files/${badId}`);
 
-      await expectHttpErrorResponse(response, {
+      expectHttpErrorResponse(response, {
         status: 404,
         errors: [
           {
@@ -92,14 +92,9 @@ describe("File Router", () => {
       expect(response.body.data).toBeDefined();
       const file = await FileModel.findById(response.body.data.id);
       expect(file).toBeDefined();
-      await expectSuccessResponse(
-        response,
-        TestFileValidator,
-        File.fromDoc(file!),
-        {
-          status: 201,
-        }
-      );
+      expectSuccessResponse(response, TestFileValidator, File.fromDoc(file!), {
+        status: 201,
+      });
     });
   });
 
@@ -110,7 +105,7 @@ describe("File Router", () => {
 
       const response = await agent.delete(`/api/files/${file1.id}`);
 
-      await expectSuccessResponse(response, TestFileValidator, file1);
+      expectSuccessResponse(response, TestFileValidator, file1);
       const files = await FileModel.find();
       expect(files.length).toBe(1);
       expect(files[0].id).toEqual(file2.id);
