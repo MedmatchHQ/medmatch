@@ -1,8 +1,8 @@
 import {
-  IsString,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
-  IsMongoId,
+  IsString,
   IsUrl,
 } from "class-validator";
 

@@ -1,8 +1,8 @@
 import { ConflictError, NotFoundError } from "@/types/errors";
 
 enum FileCode {
-  FileNotFound = 'FILE_NOT_FOUND',
-  FileConflict = 'FILE_CONFLICT',
+  FileNotFound = "FILE_NOT_FOUND",
+  FileConflict = "FILE_CONFLICT",
 }
 
 class FileNotFoundError extends NotFoundError {
@@ -17,4 +17,4 @@ class FileConflictError extends ConflictError {
   }
 }
 
-export { FileNotFoundError, FileConflictError, FileCode };
+export { FileCode, FileConflictError, FileNotFoundError };

@@ -8,7 +8,7 @@ import {
   InputExperience,
 } from "./student-profile.model";
 import { ObjectId } from "mongodb";
-import { FileNotFoundError } from "@/modules/files";
+import { FileNotFoundError } from "@/modules/files/utils/file.errors";
 import {
   ExperienceNotFoundError,
   StudentProfileNotFoundError,

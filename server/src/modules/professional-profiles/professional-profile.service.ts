@@ -1,12 +1,12 @@
+import { Model } from "mongoose";
 import {
-  ProfessionalProfile,
-  ProfessionalProfileModel,
-  ProfessionalProfileDoc,
   InputProfessionalProfile,
+  ProfessionalProfile,
+  ProfessionalProfileDoc,
+  ProfessionalProfileModel,
   ProfessionalProfileSchema,
 } from "./professional-profile.model";
 import { ProfessionalProfileNotFoundError } from "./utils/professional-profile.errors";
-import { Model } from "mongoose";
 
 /**
  * Handles professional profile-related business logic such as CRUD operations.

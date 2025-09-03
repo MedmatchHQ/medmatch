@@ -1,4 +1,4 @@
-import mongoose, { Schema, HydratedDocument, InferSchemaType } from "mongoose";
+import mongoose, { HydratedDocument, InferSchemaType, Schema } from "mongoose";
 
 const ALLOWED_FILE_TYPES = [
   "image/jpeg",
@@ -36,4 +36,4 @@ class File {
 
 const FileModel = mongoose.model<FileSchema>("File", fileSchema, "files");
 
-export { FileModel, File, FileDoc, FileSchema };
+export { File, FileDoc, FileModel, FileSchema };

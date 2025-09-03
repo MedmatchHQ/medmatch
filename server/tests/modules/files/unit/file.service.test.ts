@@ -2,10 +2,10 @@ import {
   createTestFile,
   getFileData,
 } from "#/modules/files/utils/file.helpers";
-import { expectMatch } from "#/utils/validation";
 import { TestFileValidator } from "#/modules/files/utils/file.validators";
+import { expectMatch } from "#/utils/validation";
+import { File, FileModel } from "@/modules/files/file.model";
 import { FileService } from "@/modules/files/file.service";
-import { FileModel, File } from "@/modules/files/file.model";
 import { FileNotFoundError } from "@/modules/files/utils/file.errors";
 import { Types } from "mongoose";
 

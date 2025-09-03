@@ -1,28 +1,26 @@
-import bcrypt from "bcrypt";
 import {
   Account,
-  AccountModel,
-  CreateAccountInput,
   AccountConflictError,
+  AccountModel,
   AccountSchema,
+  CreateAccountInput,
 } from "@/modules/auth";
-import { UnauthorizedError } from "@/types/errors";
-import { MongoError } from "mongodb";
-import { MongooseCode } from "@/types/errors";
-import jwt from "jsonwebtoken";
-import { Model } from "mongoose";
-import {
-  StudentProfile,
-  StudentProfileModel,
-  StudentProfileDoc,
-} from "@/modules/student-profiles/student-profile.model";
-import { StudentProfileNotFoundError } from "@/modules/student-profiles/utils/student-profile.errors";
 import {
   ProfessionalProfile,
-  ProfessionalProfileModel,
   ProfessionalProfileDoc,
+  ProfessionalProfileModel,
 } from "@/modules/professional-profiles/professional-profile.model";
 import { ProfessionalProfileNotFoundError } from "@/modules/professional-profiles/utils/professional-profile.errors";
+import {
+  StudentProfile,
+  StudentProfileDoc,
+  StudentProfileModel,
+} from "@/modules/student-profiles/student-profile.model";
+import { StudentProfileNotFoundError } from "@/modules/student-profiles/utils/student-profile.errors";
+import { MongooseCode, UnauthorizedError } from "@/types/errors";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { Model } from "mongoose";
 
 /**
  * Handles authentication-related business logic such as login, signup,
@@ -71,11 +69,8 @@ class AuthService {
       const accountDoc = new this.accountModel(accountData);
       await accountDoc.save();
       return Account.fromDoc(accountDoc);
-    } catch (error) {
-      if (
-        error instanceof MongoError &&
-        error.code === MongooseCode.DuplicateKey
-      ) {
+    } catch (error: any) {
+      if (error.code === MongooseCode.DuplicateKey) {
         throw new AccountConflictError(
           `Account with email ${email} already exists`
         );

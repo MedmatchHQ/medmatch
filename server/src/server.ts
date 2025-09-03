@@ -6,10 +6,10 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { fileRouter } from "@/modules/files";
+import { fileRouter } from "@/modules/files/file.router";
 import { errorHandler } from "@/utils/errorHandler";
 import { authRouter } from "@/modules/auth";
-import { professionalProfileRouter } from "@/modules/professional-profiles";
+import { professionalProfileRouter } from "@/modules/professional-profiles/professional-profile.router";
 import { studentProfileRouter } from "@/modules/student-profiles/student-profile.router";
 import { loggingMiddleware } from "./utils/logging";
 

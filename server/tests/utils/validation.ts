@@ -1,10 +1,10 @@
+import { ValidationErrorBodyValidator } from "#/utils/response.validator";
+import { ErrorLocation, IValidationError } from "@/types/errors";
+import { formatClassErrors } from "@/utils/validationMiddleware";
 import { plainToInstance } from "class-transformer";
 import { validateSync } from "class-validator";
 import mongoose from "mongoose";
-import { ValidationErrorBodyValidator } from "#/utils/response.validator";
 import { Response } from "supertest";
-import { ErrorLocation, IValidationError } from "@/types/errors";
-import { formatClassErrors } from "@/utils/validationMiddleware";
 
 type ClassType<T> = { new (...args: any[]): T };
 
@@ -13,10 +13,7 @@ type ClassType<T> = { new (...args: any[]): T };
  * @param classType The class to validate against.
  * @param obj The object to validate.
  */
-function expectMatch<T extends object>(
-  classType: ClassType<T>,
-  obj: object
-) {
+function expectMatch<T extends object>(classType: ClassType<T>, obj: object) {
   if (obj == null) {
     throw new Error("Object to validate cannot be null or undefined");
   }
@@ -46,7 +43,7 @@ function expectIdValidationError(
   expect(response.headers["content-type"]).toBe(
     "application/json; charset=utf-8"
   );
-  expectMatch(response.body, ValidationErrorBodyValidator);
+  expectMatch(ValidationErrorBodyValidator, response.body);
   expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
   const [error] = response.body.errors;
   expect(error.loc).toEqual("params");
@@ -74,7 +71,7 @@ function expectValidationErrors(
   expect(response.headers["content-type"]).toContain(
     "application/json; charset=utf-8"
   );
-  expectMatch(response.body, ValidationErrorBodyValidator);
+  expectMatch(ValidationErrorBodyValidator, response.body);
 
   const errors: IValidationError[] = response.body.errors;
   expect(errors.length).toBeGreaterThanOrEqual(expectedFields.length);
@@ -86,4 +83,4 @@ function expectValidationErrors(
   });
 }
 
-export { expectMatch, expectIdValidationError, expectValidationErrors };
+export { expectIdValidationError, expectMatch, expectValidationErrors };

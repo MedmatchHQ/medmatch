@@ -1,14 +1,13 @@
-import { Router } from "express";
-import multer from "multer";
-import { FileController } from "./file.controller";
-import { FileValidator } from "./utils/file.validator";
+import { authenticate } from "@/utils/authentication";
 import {
   validateFile,
   validateId,
   validation,
 } from "@/utils/validationMiddleware";
-import { authenticate } from "@/utils/authentication";
-import { check } from "express-validator";
+import { Router } from "express";
+import multer from "multer";
+import { FileController } from "./file.controller";
+import { FileValidator } from "./utils/file.validator";
 
 const fileRouter = Router();
 const fileController = new FileController();

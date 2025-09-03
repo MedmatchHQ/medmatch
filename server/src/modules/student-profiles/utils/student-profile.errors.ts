@@ -17,4 +17,8 @@ class ExperienceNotFoundError extends NotFoundError {
   }
 }
 
-export { StudentProfileNotFoundError, StudentProfileCode, ExperienceNotFoundError };
+export {
+  ExperienceNotFoundError,
+  StudentProfileCode,
+  StudentProfileNotFoundError,
+};

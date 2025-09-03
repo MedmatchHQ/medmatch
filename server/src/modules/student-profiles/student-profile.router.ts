@@ -4,7 +4,7 @@ import {
   StudentProfileValidator,
   ExperienceValidator,
 } from "./utils/student-profile.validator";
-import { FileValidator } from "@/modules/files";
+import { FileValidator } from "@/modules/files/utils/file.validator";
 import {
   validation,
   validateBody,

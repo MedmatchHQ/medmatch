@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 class TestAccountValidator {
   @IsString()

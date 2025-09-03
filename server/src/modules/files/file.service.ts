@@ -1,5 +1,5 @@
-import { File, FileDoc, FileModel, FileSchema } from "./file.model";
 import { Model } from "mongoose";
+import { File, FileDoc, FileModel, FileSchema } from "./file.model";
 import { FileNotFoundError } from "./utils/file.errors";
 
 class FileService {

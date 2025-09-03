@@ -1,10 +1,10 @@
+import { createMockRequest, createMockResponse } from "#/utils/express.mocks";
+import { expectControllerSuccessResponse } from "#/utils/helpers";
 import { FileController } from "@/modules/files/file.controller";
 import { FileService } from "@/modules/files/file.service";
-import { createMockFileService } from "../utils/file.mocks";
-import { createMockRequest, createMockResponse } from "#/utils/express.mocks";
 import { Request, Response } from "express";
 import { createTestFile } from "../utils/file.helpers";
-import { expectControllerSuccessResponse } from "#/utils/helpers";
+import { createMockFileService } from "../utils/file.mocks";
 
 describe("File Controller", () => {
   let fileService: jest.Mocked<FileService>;

@@ -1,13 +1,13 @@
+import { authenticate } from "@/utils/authentication";
+import {
+  validateBody,
+  validateId,
+  validatePartialBody,
+  validation,
+} from "@/utils/validationMiddleware";
 import Router from "express";
 import { ProfessionalProfileController } from "./professional-profile.controller";
 import { ProfessionalProfileValidator } from "./utils/professional-profile.validator";
-import {
-  validation,
-  validateBody,
-  validatePartialBody,
-  validateId,
-} from "@/utils/validationMiddleware";
-import { authenticate } from "@/utils/authentication";
 
 const professionalProfileRouter = Router();
 const professionalProfileController = new ProfessionalProfileController();

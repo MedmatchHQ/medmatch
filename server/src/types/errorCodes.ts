@@ -1,8 +1,8 @@
-import { GeneralCode } from "@/types/errors";
-import { FileCode } from "@/modules/files";
 import { AccountCode } from "@/modules/auth";
-import { StudentProfileCode } from "@/modules/student-profiles/utils/student-profile.errors";
+import { FileCode } from "@/modules/files/utils/file.errors";
 import { ProfessionalProfileCode } from "@/modules/professional-profiles/utils/professional-profile.errors";
+import { StudentProfileCode } from "@/modules/student-profiles/utils/student-profile.errors";
+import { GeneralCode } from "@/types/errors";
 
 const allErrorCodes = [
   ...Object.values(GeneralCode),

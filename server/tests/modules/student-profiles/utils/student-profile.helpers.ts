@@ -1,9 +1,9 @@
 import { createTestAccount } from "#/modules/auth/utils/account.helpers";
 import {
-  StudentProfileModel,
-  StudentProfile,
   InputStudentProfile,
+  StudentProfile,
   StudentProfileDoc,
+  StudentProfileModel,
 } from "@/modules/student-profiles/student-profile.model";
 
 const getStudentProfileData = async (): Promise<InputStudentProfile> => ({

@@ -1,5 +1,5 @@
 import MaxBufferSize from "@/utils/maxBufferSize";
-import { IsString, IsNotEmpty, IsIn, IsDefined } from "class-validator";
+import { IsDefined, IsIn, IsNotEmpty, IsString } from "class-validator";
 
 class FileValidator {
   @IsString()

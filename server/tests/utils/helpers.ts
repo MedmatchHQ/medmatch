@@ -1,12 +1,12 @@
-import { Response as SupertestResponse } from "supertest";
-import { Response as ExpressResponse } from "express";
-import { expectMatch } from "#/utils/validation";
 import {
   HttpErrorBodyValidator,
   SuccessBodyValidator,
 } from "#/utils/response.validator";
-import { ClassType } from "@/types/validation";
+import { expectMatch } from "#/utils/validation";
 import { HttpError } from "@/types/errors";
+import { ClassType } from "@/types/validation";
+import { Response as ExpressResponse } from "express";
+import { Response as SupertestResponse } from "supertest";
 
 /**
  * Expects the given HTTP response to match the structure for a successful response in an integration test.
@@ -126,7 +126,7 @@ function expectControllerSuccessResponse<T>(
 }
 
 export {
-  expectSuccessResponse,
-  expectHttpErrorResponse,
   expectControllerSuccessResponse,
+  expectHttpErrorResponse,
+  expectSuccessResponse,
 };

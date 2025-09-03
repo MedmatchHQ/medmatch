@@ -1,16 +1,17 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { FileValidator } from "@/modules/files/utils/file.validator";
+import { IValidationError } from "@/types/errors";
+import { ErrorResponseBody } from "@/types/responseBody";
 import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
 import {
+  ValidationError as ClassValidationError,
+  validate,
+} from "class-validator";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import {
+  ValidationError as ExpressValidationError,
   param,
   validationResult,
-  ValidationError as ExpressValidationError,
-  check,
 } from "express-validator";
-import { ValidationError as ClassValidationError } from "class-validator";
-import { IValidationError } from "@/types/errors";
-import { FileValidator } from "@/modules/files";
-import { ErrorResponseBody } from "@/types/responseBody";
 
 /** Represents a constructor for a class */
 type ClassType<T> = { new (...args: any[]): T };
@@ -205,10 +206,10 @@ function validation(
 }
 
 export {
-  validation,
-  validateBody,
-  validatePartialBody,
-  validateId,
-  validateFile,
   formatClassErrors,
+  validateBody,
+  validateFile,
+  validateId,
+  validatePartialBody,
+  validation,
 };
