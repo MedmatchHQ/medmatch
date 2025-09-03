@@ -1,4 +1,4 @@
-import { ModelWithOverrides, Replace } from "@/types/mongoose";
+import { Replace } from "@/types/mongoose";
 import mongoose, { Schema, HydratedDocument, InferSchemaType } from "mongoose";
 
 /** Mongoose schema definition for professional profile */
