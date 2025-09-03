@@ -1,10 +1,10 @@
 import { Transform } from "class-transformer";
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
   IsISO8601,
   IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
   IsUrl,
 } from "class-validator";
 

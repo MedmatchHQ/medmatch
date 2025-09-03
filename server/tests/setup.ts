@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
 import "reflect-metadata";
 
 let mongoServer: MongoMemoryServer;
@@ -21,7 +21,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.close(); 
+  await mongoose.connection.close();
   await mongoServer.stop();
 });
 

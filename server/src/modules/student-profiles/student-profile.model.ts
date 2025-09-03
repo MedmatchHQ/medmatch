@@ -1,11 +1,11 @@
+import { File, FileDoc } from "@/modules/files/file.model";
 import { ModelWithOverrides, Replace } from "@/types/mongoose";
 import mongoose, {
-  Schema,
   HydratedDocument,
-  InferSchemaType,
   HydratedSingleSubdocument,
+  InferSchemaType,
+  Schema,
 } from "mongoose";
-import { File, FileDoc } from "@/modules/files";
 
 /** Mongoose schema definition for experience */
 const experienceSchema = new Schema({
@@ -146,15 +146,16 @@ const StudentProfileModel = mongoose.model<
 >("StudentProfile", studentProfileSchema, "studentProfiles");
 
 export {
-  ExperienceSchema,
-  StudentProfileSchema,
-  UnpopulatedExperienceDoc,
-  UnpopulatedStudentProfileDoc,
-  StudentProfileDoc,
   Experience,
-  StudentProfile,
-  StudentProfileModel,
-  StudentProfileModelType,
+  ExperienceSchema,
   InputExperience,
   InputStudentProfile,
+  StudentProfile,
+  StudentProfileDoc,
+  StudentProfileModel,
+  StudentProfileModelType,
+  StudentProfileSchema,
+  UnpopulatedExperienceDoc,
+  UnpopulatedStudentProfileDoc
 };
+

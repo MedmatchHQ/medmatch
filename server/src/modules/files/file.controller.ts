@@ -1,7 +1,7 @@
-import { FileService } from "./file.service";
-import { File } from "./file.model";
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
+import { File } from "./file.model";
+import { FileService } from "./file.service";
 
 class FileController {
   constructor(private fileService: FileService = new FileService()) {}

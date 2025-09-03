@@ -1,4 +1,9 @@
 import {
+  createTestStudentProfile,
+  getStudentProfileData,
+} from "#/modules/student-profiles/utils/student-profile.helpers";
+import { TestStudentProfileValidator } from "#/modules/student-profiles/utils/student-profile.validators";
+import {
   expectHttpErrorResponse,
   expectSuccessResponse,
 } from "#/utils/helpers";
@@ -7,23 +12,18 @@ import {
   getAuthenticatedAgent,
   HTTPMethod,
 } from "#/utils/mockAuthentication";
-import TestAgent from "supertest/lib/agent";
-import {
-  createTestStudentProfile,
-  getStudentProfileData,
-} from "#/modules/student-profiles/utils/student-profile.helpers";
-import { TestStudentProfileValidator } from "#/modules/student-profiles/utils/student-profile.validators";
-import { Types } from "mongoose";
-import {
-  StudentProfileNotFoundError,
-  ExperienceNotFoundError,
-} from "@/modules/student-profiles/utils/student-profile.errors";
-import {
-  StudentProfileModel,
-  StudentProfile,
-} from "@/modules/student-profiles/student-profile.model";
 import { expectValidationErrors } from "#/utils/validation";
 import { FileModel } from "@/modules/files/file.model";
+import {
+  StudentProfile,
+  StudentProfileModel,
+} from "@/modules/student-profiles/student-profile.model";
+import {
+  ExperienceNotFoundError,
+  StudentProfileNotFoundError,
+} from "@/modules/student-profiles/utils/student-profile.errors";
+import { Types } from "mongoose";
+import TestAgent from "supertest/lib/agent";
 
 describe("Student Profile Router", () => {
   let agent: TestAgent;

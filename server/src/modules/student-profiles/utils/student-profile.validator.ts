@@ -1,12 +1,12 @@
 import { Transform, Type } from "class-transformer";
 import {
-  IsString,
-  IsNotEmpty,
-  ValidateNested,
-  IsOptional,
-  IsISO8601,
   IsArray,
+  IsISO8601,
   IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
 } from "class-validator";
 
 class ExperienceValidator {
@@ -70,4 +70,4 @@ class StudentProfileValidator {
   entryDate?: string;
 }
 
-export { StudentProfileValidator, ExperienceValidator };
+export { ExperienceValidator, StudentProfileValidator };

@@ -1,4 +1,9 @@
 import {
+  createTestFile,
+  getFileData,
+} from "#/modules/files/utils/file.helpers";
+import { TestFileValidator } from "#/modules/files/utils/file.validators";
+import {
   expectHttpErrorResponse,
   expectSuccessResponse,
 } from "#/utils/helpers";
@@ -7,15 +12,10 @@ import {
   getAuthenticatedAgent,
   HTTPMethod,
 } from "#/utils/mockAuthentication";
-import TestAgent from "supertest/lib/agent";
-import {
-  createTestFile,
-  getFileData,
-} from "#/modules/files/utils/file.helpers";
-import { TestFileValidator } from "#/modules/files/utils/file.validators";
-import { Types } from "mongoose";
+import { File, FileModel } from "@/modules/files/file.model";
 import { FileCode } from "@/modules/files/utils/file.errors";
-import { FileModel, File } from "@/modules/files/file.model";
+import { Types } from "mongoose";
+import TestAgent from "supertest/lib/agent";
 
 describe("File Router", () => {
   let agent: TestAgent;

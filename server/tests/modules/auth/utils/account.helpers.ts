@@ -1,6 +1,6 @@
 import {
-  AccountModel,
   Account,
+  AccountModel,
   CreateAccountInput,
 } from "@/modules/auth/auth.model";
 import bcrypt from "bcrypt";

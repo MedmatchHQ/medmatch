@@ -1,4 +1,9 @@
 import {
+  createTestProfessionalProfile,
+  getProfessionalProfileData,
+} from "#/modules/professional-profiles/utils/professional-profile.helpers";
+import { TestProfessionalProfileValidator } from "#/modules/professional-profiles/utils/professional-profile.validators";
+import {
   expectHttpErrorResponse,
   expectSuccessResponse,
 } from "#/utils/helpers";
@@ -7,19 +12,14 @@ import {
   getAuthenticatedAgent,
   HTTPMethod,
 } from "#/utils/mockAuthentication";
-import TestAgent from "supertest/lib/agent";
-import {
-  createTestProfessionalProfile,
-  getProfessionalProfileData,
-} from "#/modules/professional-profiles/utils/professional-profile.helpers";
-import { TestProfessionalProfileValidator } from "#/modules/professional-profiles/utils/professional-profile.validators";
-import { Types } from "mongoose";
-import { ProfessionalProfileCode } from "@/modules/professional-profiles/utils/professional-profile.errors";
-import {
-  ProfessionalProfileModel,
-  ProfessionalProfile,
-} from "@/modules/professional-profiles/professional-profile.model";
 import { expectValidationErrors } from "#/utils/validation";
+import {
+  ProfessionalProfile,
+  ProfessionalProfileModel,
+} from "@/modules/professional-profiles/professional-profile.model";
+import { ProfessionalProfileCode } from "@/modules/professional-profiles/utils/professional-profile.errors";
+import { Types } from "mongoose";
+import TestAgent from "supertest/lib/agent";
 
 describe("Professional Profile Router", () => {
   let agent: TestAgent;

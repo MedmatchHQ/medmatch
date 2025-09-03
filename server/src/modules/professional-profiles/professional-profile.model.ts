@@ -1,5 +1,5 @@
-import { ModelWithOverrides, Replace } from "@/types/mongoose";
-import mongoose, { Schema, HydratedDocument, InferSchemaType } from "mongoose";
+import { Replace } from "@/types/mongoose";
+import mongoose, { HydratedDocument, InferSchemaType, Schema } from "mongoose";
 
 /** Mongoose schema definition for professional profile */
 const professionalProfileSchema = new Schema({
@@ -78,10 +78,10 @@ const ProfessionalProfileModel = mongoose.model<ProfessionalProfileSchema>(
 );
 
 export {
+  InputProfessionalProfile,
+  ProfessionalProfile,
+  ProfessionalProfileDoc,
+  ProfessionalProfileModel,
   ProfessionalProfileSchema,
   UnpopulatedProfessionalProfileDoc,
-  ProfessionalProfileDoc,
-  ProfessionalProfile,
-  ProfessionalProfileModel,
-  InputProfessionalProfile,
 };

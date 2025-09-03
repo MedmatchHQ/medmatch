@@ -1,8 +1,8 @@
 import { createTestAccount } from "#/modules/auth/utils/account.helpers";
 import {
-  ProfessionalProfileModel,
-  ProfessionalProfile,
   InputProfessionalProfile,
+  ProfessionalProfile,
+  ProfessionalProfileModel,
 } from "@/modules/professional-profiles/professional-profile.model";
 
 const getProfessionalProfileData =

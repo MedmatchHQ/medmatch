@@ -8,7 +8,7 @@ import {
 } from "express-validator";
 import { ValidationError as ClassValidationError } from "class-validator";
 import { IValidationError } from "@/types/errors";
-import { FileValidator } from "@/modules/files";
+import { FileValidator } from "@/modules/files/utils/file.validator";
 
 /** Represents a constructor for a class */
 type ClassType<T> = { new (...args: any[]): T };

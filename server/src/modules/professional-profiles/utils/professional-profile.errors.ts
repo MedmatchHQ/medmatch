@@ -10,4 +10,4 @@ class ProfessionalProfileNotFoundError extends NotFoundError {
   }
 }
 
-export { ProfessionalProfileNotFoundError, ProfessionalProfileCode };
+export { ProfessionalProfileCode, ProfessionalProfileNotFoundError };

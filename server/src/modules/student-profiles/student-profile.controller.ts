@@ -1,8 +1,9 @@
-import { StudentProfileService } from "./student-profile.service";
-import { InputExperience, InputStudentProfile } from "./student-profile.model";
+import { FileService } from "@/modules/files/file.service";
+import { File } from "@/modules/files/file.model";
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
-import { FileService, File } from "@/modules/files";
+import { InputExperience, InputStudentProfile } from "./student-profile.model";
+import { StudentProfileService } from "./student-profile.service";
 
 class StudentProfileController {
   constructor(

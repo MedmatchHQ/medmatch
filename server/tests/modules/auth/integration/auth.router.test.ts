@@ -2,22 +2,22 @@ import {
   createTestAccount,
   getAccountData,
 } from "#/modules/auth/utils/account.helpers";
-import request from "supertest";
-import { app } from "@/server";
+import { TestAccountValidator } from "#/modules/auth/utils/account.validators";
+import { createTestProfessionalProfile } from "#/modules/professional-profiles/utils/professional-profile.helpers";
+import { TestProfessionalProfileValidator } from "#/modules/professional-profiles/utils/professional-profile.validators";
+import { createTestStudentProfile } from "#/modules/student-profiles/utils/student-profile.helpers";
+import { TestStudentProfileValidator } from "#/modules/student-profiles/utils/student-profile.validators";
 import {
   expectHttpErrorResponse,
   expectSuccessResponse,
 } from "#/utils/helpers";
-import { TestAccountValidator } from "#/modules/auth/utils/account.validators";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { UnauthorizedError } from "@/types/errors";
+import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
 import { Account, AccountModel } from "@/modules/auth/auth.model";
 import { AccountConflictError } from "@/modules/auth/utils/auth.errors";
-import { createTestStudentProfile } from "#/modules/student-profiles/utils/student-profile.helpers";
-import { TestStudentProfileValidator } from "#/modules/student-profiles/utils/student-profile.validators";
-import { createTestProfessionalProfile } from "#/modules/professional-profiles/utils/professional-profile.helpers";
-import { TestProfessionalProfileValidator } from "#/modules/professional-profiles/utils/professional-profile.validators";
-import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
+import { app } from "@/server";
+import { UnauthorizedError } from "@/types/errors";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import request from "supertest";
 import TestAgent from "supertest/lib/agent";
 
 const SEVEN_DAYS_IN_SECONDS = 604800;

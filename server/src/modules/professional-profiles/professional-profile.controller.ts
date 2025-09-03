@@ -1,7 +1,7 @@
-import { ProfessionalProfileService } from "./professional-profile.service";
-import { InputProfessionalProfile } from "./professional-profile.model";
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
+import { InputProfessionalProfile } from "./professional-profile.model";
+import { ProfessionalProfileService } from "./professional-profile.service";
 
 class ProfessionalProfileController {
   constructor(

@@ -1,12 +1,12 @@
+import { Type } from "class-transformer";
 import {
-  IsString,
-  IsOptional,
-  IsMongoId,
-  IsDate,
   IsArray,
+  IsDate,
+  IsMongoId,
+  IsOptional,
+  IsString,
   ValidateNested,
 } from "class-validator";
-import { Type } from "class-transformer";
 
 class TestExperienceValidator {
   @IsMongoId()
@@ -65,4 +65,4 @@ class TestStudentProfileValidator {
   experiences!: TestExperienceValidator[];
 }
 
-export { TestStudentProfileValidator, TestExperienceValidator };
+export { TestExperienceValidator, TestStudentProfileValidator };
