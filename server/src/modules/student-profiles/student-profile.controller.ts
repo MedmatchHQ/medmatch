@@ -1,5 +1,5 @@
 import { FileService } from "@/modules/files/file.service";
-import { File } from "@/modules/files/file.model";
+import { File, FileCreateData } from "@/modules/files/file.model";
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
 import { InputExperience, InputStudentProfile } from "./student-profile.model";
@@ -121,7 +121,7 @@ class StudentProfileController {
       name: fileData.originalname,
       type: fileData.mimetype,
       data: fileData.buffer,
-    } as File);
+    } as FileCreateData);
     const profile = await this.studentProfileService.setPicture(id, file.id);
     res.status(200).json({
       status: "success",
@@ -173,7 +173,7 @@ class StudentProfileController {
       name: fileData.originalname,
       type: fileData.mimetype,
       data: fileData.buffer,
-    } as File);
+    } as FileCreateData);
     const profile = await this.studentProfileService.setResume(id, file.id);
     res.status(200).json({
       status: "success",

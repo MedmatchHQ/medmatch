@@ -1,3 +1,4 @@
+import { Replace } from "@/types/mongoose";
 import mongoose, { HydratedDocument, InferSchemaType, Schema } from "mongoose";
 
 const ALLOWED_FILE_TYPES = [
@@ -7,6 +8,10 @@ const ALLOWED_FILE_TYPES = [
 ] as const;
 
 type FileType = (typeof ALLOWED_FILE_TYPES)[number];
+
+const isAllowedFileType = (s: string): s is FileType => {
+  return (ALLOWED_FILE_TYPES as readonly string[]).includes(s);
+};
 
 const fileSchema = new Schema({
   name: { type: String, required: true },
@@ -34,6 +39,8 @@ class File {
   }
 }
 
+type FileCreateData = Replace<FileSchema, { type: FileType }>;
+
 const FileModel = mongoose.model<FileSchema>("File", fileSchema, "files");
 
-export { File, FileDoc, FileModel, FileSchema };
+export { File, FileCreateData, FileDoc, FileModel, FileSchema, isAllowedFileType };
