@@ -31,6 +31,7 @@ body {
     --foreground: var(--body-text); 
     --card: var(--background-white); 
     --card-foreground: var(--body-text); 
+    --card-student: 0, 0%, 100%, 0.6;
     --popover: var(--background-white); 
     --popover-foreground: var(--body-text); 
     --primary: var(--primary-purple); 

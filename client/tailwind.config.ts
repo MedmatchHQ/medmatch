@@ -12,9 +12,9 @@ export default {
   	extend: {
   		colors: {
   			background: {
-				DEFAULT: 'hsl(var(--background))',
-				white: 'hsl(var(--background-white))',
-			},
+  				DEFAULT: 'hsl(var(--background))',
+  				white: 'hsl(var(--background-white))'
+  			},
   			foreground: 'hsl(var(--foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
@@ -27,34 +27,32 @@ export default {
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))',
-				
-				//custom colors
-				purple: {
-					DEFAULT: 'hsl(var(--primary-purple))',
-					hover: 'hsl(var(--primary-purple-hover))',
-					500: 'hsl(var(--primary-purple))',
-					400: 'hsl(var(--primary-purple-g1))',
-					300: 'hsl(var(--primary-purple-g2))',
-					200: 'hsl(var(--primary-purple-g3))',
-				},
-				blue: {
-					DEFAULT: 'hsl(var(--primary-blue))',
-					500: 'hsl(var(--primary-blue))',
-					400: 'hsl(var(--primary-blue-g1))',
-					300: 'hsl(var(--primary-blue-g2))',
-					200: 'hsl(var(--primary-blue-g3))',
-				},
+  				purple: {
+  					'200': 'hsl(var(--primary-purple-g3))',
+  					'300': 'hsl(var(--primary-purple-g2))',
+  					'400': 'hsl(var(--primary-purple-g1))',
+  					'500': 'hsl(var(--primary-purple))',
+  					DEFAULT: 'hsl(var(--primary-purple))',
+  					hover: 'hsl(var(--primary-purple-hover))'
+  				},
+  				blue: {
+  					'200': 'hsl(var(--primary-blue-g3))',
+  					'300': 'hsl(var(--primary-blue-g2))',
+  					'400': 'hsl(var(--primary-blue-g1))',
+  					'500': 'hsl(var(--primary-blue))',
+  					DEFAULT: 'hsl(var(--primary-blue))'
+  				}
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))',
-				blue: {
-					DEFAULT: 'hsl(var(--secondary-blue))',
-					500: 'hsl(var(--secondary-blue))',
-					400: 'hsl(var(--secondary-blue-g1))',
-					300: 'hsl(var(--secondary-blue-g2))',
-					200: 'hsl(var(--secondary-blue-g3))',
-				},
+  				blue: {
+  					'200': 'hsl(var(--secondary-blue-g3))',
+  					'300': 'hsl(var(--secondary-blue-g2))',
+  					'400': 'hsl(var(--secondary-blue-g1))',
+  					'500': 'hsl(var(--secondary-blue))',
+  					DEFAULT: 'hsl(var(--secondary-blue))'
+  				}
   			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
@@ -78,33 +76,30 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-
-			// custom colors
-			title: {
-				pb: {
-					DEFAULT: 'hsl(var(--title-pb))',
-					hover: 'hsl(var(--title-pb-hover))',
-				},
-				basic: {
-					DEFAULT: 'hsl(var(--basic-title))',
-					hover: 'hsl(var(--basic-title-hover))',
-				},
-			},
-
-			body: {
-				text: {
-					DEFAULT: 'hsl(var(--body-text))',
-					hover: 'hsl(var(--body-text-hover))',
-				},
-			},
-			shadowsOutlines: {
-				DEFAULT: 'hsl(var(--shadows-outlines))',
-				hover: 'hsl(var(--shadows-outlines-hover))',
-			},
+  			title: {
+  				pb: {
+  					DEFAULT: 'hsl(var(--title-pb))',
+  					hover: 'hsl(var(--title-pb-hover))'
+  				},
+  				basic: {
+  					DEFAULT: 'hsl(var(--basic-title))',
+  					hover: 'hsl(var(--basic-title-hover))'
+  				}
+  			},
+  			body: {
+  				text: {
+  					DEFAULT: 'hsl(var(--body-text))',
+  					hover: 'hsl(var(--body-text-hover))'
+  				}
+  			},
+  			shadowsOutlines: {
+  				DEFAULT: 'hsl(var(--shadows-outlines))',
+  				hover: 'hsl(var(--shadows-outlines-hover))'
+  			}
   		},
   		fontFamily: {
   			sans: [
-					'var(--font-inter)',
+  				'var(--font-inter)',
   				'var(--font-nunito-sans)',
   				'sans-serif'
   			],
@@ -117,6 +112,28 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		keyframes: {
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
   		}
   	}
   },
