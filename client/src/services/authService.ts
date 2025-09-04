@@ -1,8 +1,8 @@
 import { authClient } from "@/lib/authClient";
 import { signIn, signOut } from "next-auth/react";
-import { AccountWithTokens, CreateAccountInput } from "@/types/dto/accountDto";
+import { AccountWithTokens, CreateAccountInput, SignupInput } from "@/types/dto/accountDto";
 
-const withBase = (path: string) => `/api/auth${path}`;
+const withBase = (path: string) => `/accounts${path}`;
 
 /**
  * Authenticates a user based on email and password, adding the user to the session.
@@ -44,7 +44,7 @@ async function login(
  * @throws An `AxiosError` if there is a login conflict. Generic error if the NextAuth request fails.
  */
 async function signup(
-  accountData: CreateAccountInput,
+  accountData: SignupInput,
   callbackUrl: string | null = "/"
 ): Promise<void> {
   await authClient.post<AccountWithTokens>(withBase("/signup"), accountData);
