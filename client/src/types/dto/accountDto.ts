@@ -5,10 +5,12 @@ export type Account = {
   entryDate: Date
 }
 
-export type AccountWithTokens = Account & {
-  accessToken: string,
-  refreshToken: string
+export type Tokens = {
+  refreshToken: string,
+  accessToken: string
 }
+
+export type AccountWithTokens = Account & Tokens
 
 export type CreateAccountInput = {
   email: string,

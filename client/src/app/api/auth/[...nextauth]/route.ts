@@ -1,9 +1,9 @@
 import { authClient } from "@/lib/authClient";
-import { ApiUser, Tokens } from "@/types/user";
 import NextAuth, { AuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { jwtDecode } from "jwt-decode";
 import { logout } from "@/services/authService";
+import { AccountWithTokens, Tokens } from "@/types/dto/accountDto";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -30,8 +30,8 @@ export const authOptions: AuthOptions = {
 
         let user: User;
         try {
-          const { data: body } = await authClient.post<ApiUser & Tokens>(
-            "/auth/login",
+          const { data: body } = await authClient.post<AccountWithTokens>(
+            "/api/accounts/login",
             {
               email,
               password,
@@ -88,7 +88,7 @@ export const authOptions: AuthOptions = {
         }
 
         // Refresh token
-        const { data: body } = await authClient.post<Tokens>("/auth/token", {
+        const { data: body } = await authClient.post<Tokens>("api/accounts/token", {
           refreshToken: token.refreshToken,
         });
 
