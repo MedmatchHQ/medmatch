@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { File, FileCreateData, FileDoc, FileModel, FileSchema } from "./file.model";
+import { File, FileData, FileDoc, FileModel, FileSchema } from "./file.model";
 import { FileNotFoundError } from "./utils/file.errors";
 
 class FileService {
@@ -33,7 +33,7 @@ class FileService {
    * @param fileData File data used to create a new file (excluding id)
    * @returns The newly created file object
    */
-  async createFile(fileData: FileCreateData): Promise<File> {
+  async createFile(fileData: FileData): Promise<File> {
     const file = new this.fileModel(fileData);
     const doc = await file.save();
     return File.fromDoc(doc);
@@ -45,12 +45,12 @@ class FileService {
    * @returns The file document containing binary data
    * @throws A {@link FileNotFoundError} if the file with the specified id is not found
    */
-  async getFileForDownload(fileId: string): Promise<FileDoc> {
-    const doc = await this.fileModel.findById<FileDoc>(fileId).exec();
-    if (!doc) {
+  async getFileForDownload(fileId: string): Promise<FileData> {
+    const data = await this.fileModel.findById<FileDoc>(fileId).exec();
+    if (!data) {
       throw new FileNotFoundError(`File with id ${fileId} not found`);
     }
-    return doc;
+    return data;
   }
 
   /**
@@ -65,6 +65,16 @@ class FileService {
       throw new FileNotFoundError(`File with id ${fileId} not found`);
     }
     return File.fromDoc(doc);
+  }
+
+  /**
+   * Checks if a file with the specified ID exists.
+   * @param fileId The unique identifier of the file
+   * @returns True if the file exists, false otherwise
+   */
+  async fileExists(fileId: string): Promise<boolean> {
+    const fileDoc = await this.fileModel.findById(fileId).exec();
+    return fileDoc != null;
   }
 }
 

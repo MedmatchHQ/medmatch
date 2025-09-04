@@ -39,8 +39,8 @@ class File {
   }
 }
 
-type FileCreateData = Replace<FileSchema, { type: FileType }>;
+type FileData = Replace<FileSchema, { type: FileType }>;
 
 const FileModel = mongoose.model<FileSchema>("File", fileSchema, "files");
 
-export { File, FileCreateData, FileDoc, FileModel, FileSchema, isAllowedFileType };
+export { File, FileData, FileDoc, FileModel, FileSchema, isAllowedFileType };

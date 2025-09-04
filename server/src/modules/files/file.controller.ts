@@ -1,6 +1,6 @@
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
-import { FileCreateData } from "./file.model";
+import { FileData } from "./file.model";
 import { FileService } from "./file.service";
 
 class FileController {
@@ -49,13 +49,16 @@ class FileController {
   @ControllerMethod()
   async downloadFile(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const fileDoc = await this.fileService.getFileForDownload(id);
-    
-    res.setHeader('Content-Type', fileDoc.type);
-    res.setHeader('Content-Disposition', `attachment; filename="${fileDoc.name}"`);
-    res.setHeader('Content-Length', fileDoc.data.length);
-    
-    res.status(200).end(fileDoc.data);
+    const fileData = await this.fileService.getFileForDownload(id);
+
+    res.setHeader("Content-Type", fileData.type);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${fileData.name}"`
+    );
+    res.setHeader("Content-Length", fileData.data.length);
+
+    res.status(200).end(fileData.data);
   }
 
   /**
@@ -72,7 +75,7 @@ class FileController {
       name: originalname,
       type: mimetype,
       data: buffer,
-    } as FileCreateData;
+    } as FileData;
     const file = await this.fileService.createFile(fileData);
     res.status(201).json({
       status: "success",

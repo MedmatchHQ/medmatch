@@ -1,4 +1,4 @@
-import { AccountCode } from "@/modules/auth";
+import { AccountCode } from "@/modules/auth/utils/auth.errors";
 import { FileCode } from "@/modules/files/utils/file.errors";
 import { ProfessionalProfileCode } from "@/modules/professional-profiles/utils/professional-profile.errors";
 import { StudentProfileCode } from "@/modules/student-profiles/utils/student-profile.errors";

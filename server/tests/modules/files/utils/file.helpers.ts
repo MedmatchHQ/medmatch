@@ -1,6 +1,6 @@
-import { File, FileCreateData, FileModel } from "@/modules/files/file.model";
+import { File, FileData, FileModel } from "@/modules/files/file.model";
 
-const getFileData = (): FileCreateData => ({
+const getFileData = (): FileData => ({
   type: "image/png",
   name: `Test-${Date.now()}`,
   data: Buffer.from("test data"),
@@ -10,7 +10,7 @@ const getFileData = (): FileCreateData => ({
  * @param data Optional data to override the default file data.
  * Defaults to {@link getFileData}.
  */
-async function createTestFile(data?: Partial<FileCreateData>): Promise<File> {
+async function createTestFile(data?: Partial<FileData>): Promise<File> {
   const defaultFile = getFileData();
 
   const fileData = {

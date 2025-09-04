@@ -88,7 +88,7 @@ describe("File Router", () => {
       expect(response.status).toBe(200);
       expect(response.headers["content-type"]).toBe("image/png");
       expect(response.headers["content-disposition"]).toContain("attachment");
-      expect(response.headers["content-disposition"]).toContain("test.png");
+      expect(response.headers["content-disposition"]).toContain(file.name);
       expect(response.body).toBeDefined();
     });
 

@@ -1,11 +1,4 @@
 import {
-  Account,
-  AccountConflictError,
-  AccountModel,
-  AccountSchema,
-  CreateAccountInput,
-} from "@/modules/auth";
-import {
   ProfessionalProfile,
   ProfessionalProfileDoc,
   ProfessionalProfileModel,
@@ -21,6 +14,13 @@ import { MongooseCode, UnauthorizedError } from "@/types/errors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Model } from "mongoose";
+import {
+  Account,
+  AccountModel,
+  AccountSchema,
+  CreateAccountInput,
+} from "./auth.model";
+import { AccountConflictError } from "./utils/auth.errors";
 
 /**
  * Handles authentication-related business logic such as login, signup,
@@ -190,6 +190,16 @@ class AuthService {
       );
     }
     return ProfessionalProfile.fromDoc(doc);
+  }
+
+  /**
+   * Checks if an account with the specified ID exists.
+   * @param accountId The unique identifier of the account
+   * @returns True if the account exists, false otherwise
+   */
+  async accountExists(accountId: string): Promise<boolean> {
+    const accountDoc = await this.accountModel.findById(accountId).exec();
+    return accountDoc != null;
   }
 }
 

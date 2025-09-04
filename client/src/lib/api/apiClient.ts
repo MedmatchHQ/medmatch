@@ -1,7 +1,8 @@
-import axios from "axios";
-import { getSession } from "next-auth/react";
 import { TypedAxiosInstance } from "@/types/TypedAxiosInstance";
+import { GeneralCode } from "@/types/errorCodes";
 import { ErrorBody } from "@/types/responses";
+import axios, { AxiosError, isAxiosError } from "axios";
+import { getSession } from "next-auth/react";
 
 /**
  * An axios instance for making general API requests to the backend that
@@ -11,7 +12,7 @@ import { ErrorBody } from "@/types/responses";
  */
 const apiClient = axios.create({
   withCredentials: true,
-  baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL!}/api`,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/api`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,10 +20,13 @@ const apiClient = axios.create({
 
 // Attach authorization token to all requests
 apiClient.interceptors.request.use(async (config) => {
+  console.log("interceptor");
   const session = await getSession();
   const accessToken = session?.accessToken;
 
   if (accessToken && config.headers) {
+    console.log("Setting Authorization header");
+    console.log(accessToken);
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
@@ -48,6 +52,7 @@ apiClient.interceptors.response.use(
         {
           type: "http",
           details: "An unexpected error occurred.",
+          code: GeneralCode.InternalServerError,
         },
       ],
     };
