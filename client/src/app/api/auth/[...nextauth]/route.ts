@@ -31,7 +31,7 @@ export const authOptions: AuthOptions = {
         let user: User;
         try {
           const { data: body } = await authClient.post<AccountWithTokens>(
-            "/api/accounts/login",
+            "/accounts/login",
             {
               email,
               password,
@@ -88,7 +88,7 @@ export const authOptions: AuthOptions = {
         }
 
         // Refresh token
-        const { data: body } = await authClient.post<Tokens>("api/accounts/token", {
+        const { data: body } = await authClient.post<Tokens>("/accounts/token", {
           refreshToken: token.refreshToken,
         });
 

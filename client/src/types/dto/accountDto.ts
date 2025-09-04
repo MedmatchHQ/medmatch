@@ -16,3 +16,12 @@ export type CreateAccountInput = {
   email: string,
   password: string
 }
+
+export type SignupInput = {
+  first: string,
+  last: string,
+  phone: string,
+  birthday: string,
+  email: string,
+  password: string
+}
