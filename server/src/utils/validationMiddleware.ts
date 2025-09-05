@@ -1,14 +1,17 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { FileValidator } from "@/modules/files/utils/file.validator";
+import { IValidationError } from "@/types/errors";
+import { ErrorResponseBody } from "@/types/responseBody";
 import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
 import {
+  ValidationError as ClassValidationError,
+  validate,
+} from "class-validator";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import {
+  ValidationError as ExpressValidationError,
   param,
   validationResult,
-  ValidationError as ExpressValidationError,
 } from "express-validator";
-import { ValidationError as ClassValidationError } from "class-validator";
-import { IValidationError } from "@/types/errors";
-import { FileValidator } from "@/modules/files/utils/file.validator";
 
 /** Represents a constructor for a class */
 type ClassType<T> = { new (...args: any[]): T };
@@ -76,8 +79,28 @@ const validatePartialBody = <T extends object>(
  * against a class defined with `class-validator`.
  * @param classType The class to validate the file against
  */
-const validateFile = <T extends object>(classType: ClassType<T>) =>
-  validateObjectByClass<T>(classType, true, "file");
+const validateFile = <T extends object>(
+  classType: ClassType<T>
+): RequestHandler[] => [
+  (req, res, next) => {
+    if (!req.file) {
+      const error: ErrorResponseBody = {
+        status: "error",
+        errors: [
+          {
+            type: "validation",
+            loc: "file",
+            field: "file",
+            details: "No file uploaded",
+          },
+        ],
+      };
+      return res.status(400).json(error);
+    }
+    next();
+  },
+  validateObjectByClass<T>(classType, true, "file"),
+];
 
 /**
  * Returns a request handler that validates a path param as a MongoDB ID.
@@ -183,10 +206,10 @@ function validation(
 }
 
 export {
-  validation,
-  validateBody,
-  validatePartialBody,
-  validateId,
-  validateFile,
   formatClassErrors,
+  validateBody,
+  validateFile,
+  validateId,
+  validatePartialBody,
+  validation,
 };

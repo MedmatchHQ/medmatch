@@ -28,6 +28,7 @@ describe("File Router", () => {
     test.each<[HTTPMethod, string]>([
       ["get", "/api/files"],
       ["get", "/api/files/:id"],
+      ["get", "/api/files/:id/download"],
       ["post", "/api/files"],
       ["delete", "/api/files/:id"],
     ])("`%s %s` should require authentication", async (method, endpoint) => {
@@ -65,6 +66,37 @@ describe("File Router", () => {
       const badId = new Types.ObjectId();
 
       const response = await agent.get(`/api/files/${badId}`);
+
+      expectHttpErrorResponse(response, {
+        status: 404,
+        errors: [
+          {
+            details: expect.stringContaining(badId.toString()),
+            code: FileCode.FileNotFound,
+          },
+        ],
+      });
+    });
+  });
+
+  describe("GET /:id/download", () => {
+    it("should download a file by id", async () => {
+      const file = await createTestFile();
+
+      const response = await agent.get(`/api/files/${file.id}/download`);
+
+      expect(response.status).toBe(200);
+      expect(response.headers["content-type"]).toBe("image/png");
+      expect(response.headers["content-disposition"]).toContain("attachment");
+      expect(response.headers["content-disposition"]).toContain(file.name);
+      expect(response.body).toBeDefined();
+    });
+
+    it("should return an error for file not found", async () => {
+      await createTestFile();
+      const badId = new Types.ObjectId();
+
+      const response = await agent.get(`/api/files/${badId}/download`);
 
       expectHttpErrorResponse(response, {
         status: 404,

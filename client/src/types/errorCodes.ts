@@ -7,14 +7,9 @@ enum GeneralCode {
   Conflict = 'CONFLICT',
 }
 
-enum UserCode {
-  UserNotFound = 'USER_NOT_FOUND',
-  UserConflict = 'USER_CONFLICT',
-  InvalidCredentials = 'INVALID_CREDENTIALS',
-}
-
-enum ProfileCode {
-  ProfileNotFound = 'PROFILE_NOT_FOUND',
+enum StudentProfileCode {
+  StudentProfileNotFound = "STUDENT_PROFILE_NOT_FOUND",
+  ExperienceNotFound = "EXPERIENCE_NOT_FOUND",
 }
 
 enum FileCode {
@@ -22,7 +17,12 @@ enum FileCode {
   FileConflict = 'FILE_CONFLICT',
 }
 
-type ErrorCode = GeneralCode | UserCode | ProfileCode | FileCode;
+enum AccountCode {
+  AccountNotFound = "ACCOUNT_NOT_FOUND",
+  AccountConflict = "ACCOUNT_CONFLICT",
+}
+
+type ErrorCode = GeneralCode | StudentProfileCode | FileCode | AccountCode;
 
 export type { ErrorCode };
-export { GeneralCode, UserCode, ProfileCode, FileCode };
+export { GeneralCode, StudentProfileCode, FileCode, AccountCode };

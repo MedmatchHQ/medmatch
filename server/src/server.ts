@@ -8,9 +8,10 @@ dotenv.config();
 
 import { fileRouter } from "@/modules/files/file.router";
 import { errorHandler } from "@/utils/errorHandler";
-import { authRouter } from "@/modules/auth";
+import { authRouter } from "@/modules/auth/auth.router";
 import { professionalProfileRouter } from "@/modules/professional-profiles/professional-profile.router";
 import { studentProfileRouter } from "@/modules/student-profiles/student-profile.router";
+import { loggingMiddleware } from "./utils/logging";
 
 // Express configuration
 const app = express();
@@ -36,6 +37,7 @@ async function connectDB() {
 
   const uri = `${dialect}://${username}:${password}@${host}/${collection}?retryWrites=true&w=majority&appName=${cluster}`;
 
+  console.log("[database]: Connecting...");
   await mongoose.connect(uri);
   console.log("[database]: Connected");
 }
@@ -43,6 +45,8 @@ async function connectDB() {
 mongoose.connection.on("error", (e) => {
   console.error("[database]: Connection error:", e);
 });
+
+app.use(loggingMiddleware);
 
 // Routes
 app.get("/", (req, res) => {
