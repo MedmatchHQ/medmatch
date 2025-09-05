@@ -62,7 +62,6 @@ export const authOptions: AuthOptions = {
     async jwt({ token, account, user }) {
       // Inital credentials sign in
       if (user) {
-        console.log("inital sign in");
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         return token;
