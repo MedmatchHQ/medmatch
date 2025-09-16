@@ -20,13 +20,10 @@ const apiClient = axios.create({
 
 // Attach authorization token to all requests
 apiClient.interceptors.request.use(async (config) => {
-  console.log("interceptor");
   const session = await getSession();
   const accessToken = session?.accessToken;
 
   if (accessToken && config.headers) {
-    console.log("Setting Authorization header");
-    console.log(accessToken);
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
