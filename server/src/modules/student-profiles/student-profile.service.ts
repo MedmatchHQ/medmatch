@@ -1,14 +1,17 @@
+import { FileNotFoundError } from "@/modules/files/utils/file.errors";
+import { ObjectId } from "mongodb";
+import { AuthService } from "../auth/auth.service";
+import { AccountNotFoundError } from "../auth/utils/auth.errors";
+import { FileService } from "../files/file.service";
 import {
+  InputExperience,
+  InputStudentProfile,
   StudentProfile,
   StudentProfileDoc,
-  UnpopulatedStudentProfileDoc,
-  StudentProfileModelType,
-  InputStudentProfile,
   StudentProfileModel,
-  InputExperience,
+  StudentProfileModelType,
+  UnpopulatedStudentProfileDoc,
 } from "./student-profile.model";
-import { ObjectId } from "mongodb";
-import { FileNotFoundError } from "@/modules/files/utils/file.errors";
 import {
   ExperienceNotFoundError,
   StudentProfileNotFoundError,
@@ -16,8 +19,58 @@ import {
 
 class StudentProfileService {
   constructor(
-    private studentProfileModel: StudentProfileModelType = StudentProfileModel
+    private studentProfileModel: StudentProfileModelType = StudentProfileModel,
+    private accountService: AuthService = new AuthService(),
+    private fileService: FileService = new FileService()
   ) {}
+
+  /**
+   * Validates that optional file references exist in the database
+   */
+  private async validateFileReferences(
+    profileData: Pick<InputStudentProfile, "picture" | "resume">
+  ): Promise<void> {
+    const fileChecks: Promise<void>[] = [];
+
+    if (profileData.resume) {
+      fileChecks.push(
+        this.fileService
+          .fileExists(profileData.resume.toString())
+          .then((exists) => {
+            if (!exists) {
+              throw new FileNotFoundError(
+                `Resume file with id ${profileData.resume} not found`
+              );
+            }
+          })
+      );
+    }
+
+    if (profileData.picture) {
+      fileChecks.push(
+        this.fileService
+          .fileExists(profileData.picture.toString())
+          .then((exists) => {
+            if (!exists) {
+              throw new FileNotFoundError(
+                `Picture file with id ${profileData.picture} not found`
+              );
+            }
+          })
+      );
+    }
+
+    await Promise.all(fileChecks);
+  }
+
+  /**
+   * Validates that the account exists
+   */
+  private async validateAccountExists(accountId: string): Promise<void> {
+    if (!(await this.accountService.accountExists(accountId))) {
+      throw new AccountNotFoundError(`Account with id ${accountId} not found`);
+    }
+  }
 
   /**
    * Retrieves all student profiles from the database with populated files.
@@ -55,10 +108,17 @@ class StudentProfileService {
    * Creates a new student profile with the provided data.
    * @param profileData Student profile data used to create a new student profile (no email/password - those are in Account)
    * @returns The newly created student profile object with populated files
+   * @throws A {@link AccountNotFoundError} if the account with the specified id does not exist
+   * @throws A {@link FileNotFoundError} if the picture or resume file references do not exist
    */
   async createStudentProfile(
     profileData: InputStudentProfile
   ): Promise<StudentProfile> {
+    await Promise.all([
+      this.validateFileReferences(profileData),
+      this.validateAccountExists(profileData.accountId),
+    ]);
+
     const profile = new this.studentProfileModel(profileData);
     await profile.save();
     await profile.populate(["picture", "resume"]);
@@ -71,11 +131,20 @@ class StudentProfileService {
    * @param profileData Partial student profile data to update
    * @returns The updated student profile object with populated files
    * @throws A {@link StudentProfileNotFoundError} if the student profile with the specified id is not found
+   * @throws A {@link AccountNotFoundError} if the account with the specified id does not exist
+   * @throws A {@link FileNotFoundError} if the picture or resume file references do not exist
    */
   async updateStudentProfile(
     profileId: string,
     profileData: Partial<InputStudentProfile>
   ): Promise<StudentProfile> {
+    if (profileData.picture || profileData.resume) {
+      await this.validateFileReferences(profileData);
+    }
+    if (profileData.accountId) {
+      await this.validateAccountExists(profileData.accountId);
+    }
+
     const doc = await this.studentProfileModel
       .findByIdAndUpdate<StudentProfileDoc>(profileId, profileData, {
         new: true,
@@ -241,7 +310,7 @@ class StudentProfileService {
    * @param experienceId The unique identifier of the experience to remove
    * @returns The updated student profile object with populated files
    * @throws A {@link StudentProfileNotFoundError} if the student profile with the specified id is not found
-   * @throws A {@link FileNotFoundError} if the experience is not found in the profile
+   * @throws A {@link ExperienceNotFoundError} if the experience is not found in the profile
    */
   async removeExperience(
     profileId: string,

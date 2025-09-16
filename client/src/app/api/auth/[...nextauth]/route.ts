@@ -1,9 +1,9 @@
-import { authClient } from "@/lib/authClient";
-import NextAuth, { AuthOptions, User } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { jwtDecode } from "jwt-decode";
+import { authClient } from "@/lib/api/authClient";
 import { logout } from "@/services/authService";
 import { AccountWithTokens, Tokens } from "@/types/dto/accountDto";
+import { jwtDecode } from "jwt-decode";
+import NextAuth, { AuthOptions, User } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -62,7 +62,6 @@ export const authOptions: AuthOptions = {
     async jwt({ token, account, user }) {
       // Inital credentials sign in
       if (user) {
-        console.log("inital sign in")
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         return token;
@@ -88,9 +87,12 @@ export const authOptions: AuthOptions = {
         }
 
         // Refresh token
-        const { data: body } = await authClient.post<Tokens>("/accounts/token", {
-          refreshToken: token.refreshToken,
-        });
+        const { data: body } = await authClient.post<Tokens>(
+          "/accounts/token",
+          {
+            refreshToken: token.refreshToken,
+          }
+        );
 
         token.accessToken = body.data.accessToken;
         token.refreshToken = body.data.refreshToken;
@@ -109,8 +111,8 @@ export const authOptions: AuthOptions = {
       session.accessToken = token.accessToken;
       return session;
     },
-  }
-}
+  },
+};
 
 const handler = NextAuth(authOptions);
 

@@ -1,6 +1,6 @@
 import { ControllerMethod } from "@/utils/errorHandler";
 import { Request, Response } from "express";
-import { File } from "./file.model";
+import { FileData } from "./file.model";
 import { FileService } from "./file.service";
 
 class FileController {
@@ -40,6 +40,28 @@ class FileController {
   }
 
   /**
+   * Downloads a file by its unique identifier as binary data.
+   * @param {string} req.params.id The unique identifier of the file to download
+   * @returns The file binary data with appropriate headers
+   * @codes 200, 404
+   * @throws A {@link FileNotFoundError} if the file with the specified id is not found
+   */
+  @ControllerMethod()
+  async downloadFile(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    const fileData = await this.fileService.getFileForDownload(id);
+
+    res.setHeader("Content-Type", fileData.type);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${fileData.name}"`
+    );
+    res.setHeader("Content-Length", fileData.data.length);
+
+    res.status(200).end(fileData.data);
+  }
+
+  /**
    * Creates a new file from uploaded data using multer middleware.
    * @param {Express.Multer.File} req.file The uploaded file data from multer middleware
    * @returns The newly created file object
@@ -53,8 +75,8 @@ class FileController {
       name: originalname,
       type: mimetype,
       data: buffer,
-    };
-    const file = await this.fileService.createFile(fileData as File);
+    } as FileData;
+    const file = await this.fileService.createFile(fileData);
     res.status(201).json({
       status: "success",
       message: `File with id ${file.id} created successfully`,

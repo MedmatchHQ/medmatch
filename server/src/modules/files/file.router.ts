@@ -19,6 +19,8 @@ fileRouter.get("/", fileController.getAllFiles);
 
 fileRouter.get("/:id", validation(validateId()), fileController.getFileById);
 
+fileRouter.get("/:id/download", validation(validateId()), fileController.downloadFile);
+
 fileRouter.post(
   "/",
   upload.single("file"),

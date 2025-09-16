@@ -1,12 +1,13 @@
-import { AuthController, CredentialsValidator } from "@/modules/auth";
-import { Router } from "express";
+import { AuthController } from "@/modules/auth/auth.controller";
+import { authenticate } from "@/utils/authentication";
 import {
   validateBody,
-  validation,
   validateId,
+  validation,
 } from "@/utils/validationMiddleware";
-import { cookie, oneOf, body } from "express-validator";
-import { authenticate } from "@/utils/authentication";
+import { Router } from "express";
+import { body, cookie, oneOf } from "express-validator";
+import { CredentialsValidator } from "./utils/auth.validator";
 
 const authRouter = Router();
 const authController = new AuthController();

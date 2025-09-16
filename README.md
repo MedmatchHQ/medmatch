@@ -12,14 +12,15 @@
 ## Onboarding
 ### Installing Dependencies
 To get started after cloning the repo, first install the necessary dependencies.
-The `client` and `server` folders are individual `npm` packages, so you will need to install the respective dependencies separately.  
+The `client` and `server` folders are individual `pnpm` packages, so you will need to install the respective dependencies separately.  
+Ensure you have `pnpm` installed. If you don't, follow this [guide](https://pnpm.io/installation).  
 Run the following commands from the root folder.
 ```sh
-npm ci
+pnpm i
 cd client
-npm ci
+pnpm i
 cd ../server
-npm ci
+pnpm i
 ```
 ### Connecting To The Database
 By this point, you should have recieved an invitation email to the database.  
@@ -46,9 +47,13 @@ You can use an online [uuid generator](https://www.uuidgenerator.net/) to create
 ### Starting The Development Server
 In order to start the frontend development server, run the following command from the `client` directory.
 ```
-npm run dev
+pnpm dev
 ```
-This works the same for the backend. Just run the same command from the `server` directory.
+This works the same for the backend. Just run the same command from the `server` directory.  
+If you want to run both at once, navigate to the root directory and run the following command.  
+```
+pnpm start
+```
 
 ## Documentation Website
 We will be using MkDocs for documentation. To run the documentation server, you need to do a few

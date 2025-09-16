@@ -3,7 +3,7 @@ import { expectControllerSuccessResponse } from "#/utils/helpers";
 import { FileController } from "@/modules/files/file.controller";
 import { FileService } from "@/modules/files/file.service";
 import { Request, Response } from "express";
-import { createTestFile } from "../utils/file.helpers";
+import { createTestFile, getFileData } from "../utils/file.helpers";
 import { createMockFileService } from "../utils/file.mocks";
 
 describe("File Controller", () => {
@@ -52,13 +52,14 @@ describe("File Controller", () => {
 
   describe("createFile", () => {
     it("should create a new file", async () => {
-      const mockFile = await createTestFile();
+      const fileData = getFileData();
+      const file = await createTestFile(fileData);
       req.file = {
-        originalname: mockFile.name,
-        mimetype: mockFile.type,
-        buffer: mockFile.data,
+        originalname: fileData.name,
+        mimetype: fileData.type,
+        buffer: fileData.data,
       } as unknown as Express.Multer.File;
-      fileService.createFile.mockResolvedValue(mockFile);
+      fileService.createFile.mockResolvedValue(file);
 
       await fileController.createFile(req, res);
 
@@ -69,8 +70,8 @@ describe("File Controller", () => {
       });
       expectControllerSuccessResponse(res, {
         status: 201,
-        message: expect.stringContaining(mockFile.id),
-        data: mockFile,
+        message: expect.stringContaining(file.id),
+        data: file,
       });
     });
   });
