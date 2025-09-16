@@ -15,6 +15,7 @@ To get started after cloning the repo, first install the necessary dependencies.
 The `client` and `server` folders are individual `npm` packages, so you will need to install the respective dependencies separately.  
 Run the following commands from the root folder.
 ```sh
+npm ci
 cd client
 npm ci
 cd ../server
@@ -37,8 +38,11 @@ DB_COLLECTION=medmatch
 DB_CLUSTER=radish
 DEV_PORT=4000
 NODE_ENV=development
+ACCESS_TOKEN_SECRET=[SECRET KEY]
+REFRESH_TOKEN_SECRET=[DIFFERENT SECRET KEY]
 ```
 Make sure to replace the bracketed values with the corresponding data.
+You can use an online [uuid generator](https://www.uuidgenerator.net/) to create secret keys.
 ### Starting The Development Server
 In order to start the frontend development server, run the following command from the `client` directory.
 ```

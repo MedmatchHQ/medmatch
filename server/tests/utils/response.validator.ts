@@ -1,3 +1,6 @@
+import { allErrorCodes, ErrorCode } from "@/types/errorCodes";
+import { ClassType } from "@/types/validation";
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsEnum,
@@ -6,9 +9,6 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
-import { ClassType } from "@/types/validation";
-import { Type } from "class-transformer";
-import { allErrorCodes, ErrorCode } from "@/types/errorCodes";
 
 class SuccessBodyValidator {
   @IsString()
@@ -91,9 +91,9 @@ class ValidationErrorBodyValidator {
 }
 
 export {
-  SuccessBodyValidator,
-  HttpErrorValidator,
-  ValidationErrorValidator,
   HttpErrorBodyValidator,
+  HttpErrorValidator,
+  SuccessBodyValidator,
   ValidationErrorBodyValidator,
+  ValidationErrorValidator,
 };

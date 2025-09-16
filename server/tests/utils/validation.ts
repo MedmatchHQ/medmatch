@@ -1,10 +1,10 @@
-import { plainToInstance } from "class-transformer";
-import { validate } from "class-validator";
-import mongoose from "mongoose";
 import { ValidationErrorBodyValidator } from "#/utils/response.validator";
-import { Response } from "supertest";
 import { ErrorLocation, IValidationError } from "@/types/errors";
 import { formatClassErrors } from "@/utils/validationMiddleware";
+import { plainToInstance } from "class-transformer";
+import { validateSync } from "class-validator";
+import mongoose from "mongoose";
+import { Response } from "supertest";
 
 type ClassType<T> = { new (...args: any[]): T };
 
@@ -13,10 +13,7 @@ type ClassType<T> = { new (...args: any[]): T };
  * @param classType The class to validate against.
  * @param obj The object to validate.
  */
-async function expectMatch<T extends object>(
-  classType: ClassType<T>,
-  obj: object
-) {
+function expectMatch<T extends object>(classType: ClassType<T>, obj: object) {
   if (obj == null) {
     throw new Error("Object to validate cannot be null or undefined");
   }
@@ -26,7 +23,7 @@ async function expectMatch<T extends object>(
       ? (obj as any).toObject()
       : obj;
   const instance = plainToInstance(classType, plainObj);
-  const errors = await validate(instance);
+  const errors = validateSync(instance);
   if (errors.length > 0) {
     console.error("Validation errors:", formatClassErrors(errors));
   }
@@ -38,15 +35,15 @@ async function expectMatch<T extends object>(
  * @param response The response to check.
  * @param fieldName The name of the field that should be validated. Defaults to "id".
  */
-async function expectIdValidationError(
+function expectIdValidationError(
   response: Response,
   fieldName: string = "id"
-): Promise<void> {
+): void {
   expect(response.status).toBe(400);
   expect(response.headers["content-type"]).toBe(
     "application/json; charset=utf-8"
   );
-  await expectMatch(response.body, ValidationErrorBodyValidator);
+  expectMatch(ValidationErrorBodyValidator, response.body);
   expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
   const [error] = response.body.errors;
   expect(error.loc).toEqual("params");
@@ -62,19 +59,19 @@ async function expectIdValidationError(
  * @param expectedFields The list of expected invalid fields. Specifically the ones that appear in the `field` property of each validation error.
  * @param loc The location of the validation error, defaults to "body".
  */
-async function expectValidationErrors(
+function expectValidationErrors(
   response: Response,
   expectedFields: string[],
   loc: ErrorLocation = "body",
   options?: { status?: number }
-) {
+): void {
   const { status = 400 } = options || {};
 
   expect(response.status).toBe(status);
   expect(response.headers["content-type"]).toContain(
     "application/json; charset=utf-8"
   );
-  await expectMatch(response.body, ValidationErrorBodyValidator);
+  expectMatch(ValidationErrorBodyValidator, response.body);
 
   const errors: IValidationError[] = response.body.errors;
   expect(errors.length).toBeGreaterThanOrEqual(expectedFields.length);
@@ -86,4 +83,4 @@ async function expectValidationErrors(
   });
 }
 
-export { expectMatch, expectIdValidationError, expectValidationErrors };
+export { expectIdValidationError, expectMatch, expectValidationErrors };

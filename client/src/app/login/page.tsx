@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,6 +20,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import google from "@/assets/google-icon.png";
 import linkedin from "@/assets/linkedin-icon.png";
+import { login } from "@/services/authService";
+import { CreateAccountInput } from "@/types/dto/accountDto";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -30,6 +33,9 @@ type LoginFormValues = z.infer<typeof formSchema>;
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -40,7 +46,27 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => console.log(values);
+  const onSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const loginData: CreateAccountInput = {
+        email: values.email,
+        password: values.password,
+      };
+      
+      await login(loginData, "/profile");
+      // If we reach here and no redirect happened, the login was successful
+      // but we chose not to redirect, so we can manually navigate
+      router.push("/profile");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#B1D2F6] to-[#DFEDFB]">
@@ -50,6 +76,11 @@ export default function LoginForm() {
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-800">Login</h2>
             <p className="mt-4 text-xs text-gray-500">Enter your email and password below</p>
+            {error && (
+              <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 text-sm rounded">
+                {error}
+              </div>
+            )}
           </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -103,8 +134,9 @@ export default function LoginForm() {
                 </Link>
               </div>
               <Button type="submit" 
-                className="w-full py-7 rounded-xl bg-[#735AFB] hover:bg-white text-white font-semibold">
-                Login
+                disabled={isLoading}
+                className="w-full py-7 rounded-xl bg-[#735AFB] hover:bg-white text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>

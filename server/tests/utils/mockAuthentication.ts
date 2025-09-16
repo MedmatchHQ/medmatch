@@ -1,9 +1,9 @@
+import { HTTPMethod } from "#/types/HttpMethod";
+import { app } from "@/server";
 import jwt from "jsonwebtoken";
 import request from "supertest";
-import { app } from "@/server";
-import { expectMatch } from "./validation";
 import { HttpErrorBodyValidator } from "./response.validator";
-import { HTTPMethod } from "#/types/HttpMethod";
+import { expectMatch } from "./validation";
 
 /**
  * Creates an agent that passes auth middleware checks.
@@ -39,11 +39,11 @@ async function expectEndpointToRequireAuth(
   expect(response.headers["content-type"]).toBe(
     "application/json; charset=utf-8"
   );
-  await expectMatch(HttpErrorBodyValidator, response.body);
+  expectMatch(HttpErrorBodyValidator, response.body);
   expect(response.body.errors.length).toBe(1);
   const [error] = response.body.errors;
   expect(error.type).toEqual("http");
   expect(error.code).toEqual("UNAUTHORIZED");
 }
 
-export { getAuthenticatedAgent, expectEndpointToRequireAuth, type HTTPMethod };
+export { expectEndpointToRequireAuth, getAuthenticatedAgent, type HTTPMethod };

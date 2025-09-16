@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
 import { GeneralCode, HttpError } from "@/types/errors";
 import dotenv from "dotenv";
+import { NextFunction, Request, Response } from "express";
 import { MulterError } from "multer";
 dotenv.config();
 
@@ -38,7 +38,7 @@ const errorHandler = (
         {
           type: "validation",
           loc: "file",
-          field: error.field,
+          field: error.field ?? "file",
           details: error.message,
         },
       ],
@@ -49,7 +49,7 @@ const errorHandler = (
       errors: [
         {
           type: "http",
-          details: "Internal server error",
+          details: error.message || "Internal server error",
           code: GeneralCode.InternalServerError,
         },
       ],
@@ -98,4 +98,4 @@ function ControllerMethod() {
   };
 }
 
-export { errorHandler, ControllerMethod };
+export { ControllerMethod, errorHandler };

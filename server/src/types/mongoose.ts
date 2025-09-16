@@ -51,4 +51,4 @@ type Replace<
  */
 type ModelWithOverrides<T, U> = Model<T, {}, {}, {}, U>;
 
-export { Replace, ModelWithOverrides };
+export { ModelWithOverrides, Replace };

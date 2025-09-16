@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -16,6 +17,8 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image";
 import google from "@/assets/google-icon.png";
 import linkedin from "@/assets/linkedin-icon.png";
+import { signup } from "@/services/authService";
+import { SignupInput } from "@/types/dto/accountDto";
 
 
 // zod defines form shape and fields
@@ -31,6 +34,9 @@ const formSchema = z.object({
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,8 +51,30 @@ export default function SignUpForm() {
   })
  
   // submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const signupData: SignupInput = {
+        first: values.first,
+        last: values.last,
+        phone: values.phone,
+        birthday: values.birthday,
+        email: values.email,
+        password: values.password,
+      };
+      
+      await signup(signupData, "/profile");
+      // If we reach here and no redirect happened, the signup was successful
+      // but we chose not to redirect, so we can manually navigate
+      router.push("/profile");
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError(err instanceof Error ? err.message : "Signup failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -57,6 +85,11 @@ export default function SignUpForm() {
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-800">Sign Up</h2>
             <p className="mt-4 text-xs text-gray-500">Create an account to continue!</p>
+            {error && (
+              <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 text-sm rounded">
+                {error}
+              </div>
+            )}
           </div>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -146,8 +179,9 @@ export default function SignUpForm() {
           )}
         />
         <Button type="submit" 
-          className="w-full py-7 rounded-xl bg-[#735AFB] hover:bg-white text-white font-semibold">
-          Register
+          disabled={isLoading}
+          className="w-full py-7 rounded-xl bg-[#735AFB] hover:bg-white text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLoading ? "Creating account..." : "Register"}
         </Button>
       </form>
     </Form>

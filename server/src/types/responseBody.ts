@@ -13,8 +13,4 @@ interface ErrorResponseBody {
   errors: IApiError[];
 }
 
-export {
-  SuccessResponseBody,
-  ErrorResponseBody,
-  ResponseBody,
-};
+export { ErrorResponseBody, ResponseBody, SuccessResponseBody };

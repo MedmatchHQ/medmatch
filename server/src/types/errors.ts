@@ -75,14 +75,14 @@ class UnauthorizedError extends HttpError {
 }
 
 export {
-  HttpError,
-  NotFoundError,
   ConflictError,
-  UnauthorizedError,
+  ErrorLocation,
+  GeneralCode,
+  HttpError,
   IApiError,
   IHttpError,
   IValidationError,
-  GeneralCode,
   MongooseCode,
-  ErrorLocation,
+  NotFoundError,
+  UnauthorizedError,
 };

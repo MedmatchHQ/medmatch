@@ -1,11 +1,10 @@
+import { getFileData } from "#/modules/files/utils/file.helpers";
 import { getAuthenticatedAgent } from "#/utils/mockAuthentication";
 import {
   expectIdValidationError,
   expectValidationErrors,
 } from "#/utils/validation";
 import TestAgent from "supertest/lib/agent";
-import { getFileData } from "#/modules/files/utils/file.helpers";
-import { File } from "@/modules/files/file.model";
 
 describe("File Validation", () => {
   let agent: TestAgent;
