@@ -1,6 +1,10 @@
-import { authClient } from "@/lib/authClient";
+import { authClient } from "@/lib/api/authClient";
+import {
+  AccountWithTokens,
+  CreateAccountInput,
+  SignupInput,
+} from "@/types/dto/accountDto";
 import { signIn, signOut } from "next-auth/react";
-import { AccountWithTokens, CreateAccountInput, SignupInput } from "@/types/dto/accountDto";
 
 const withBase = (path: string) => `/accounts${path}`;
 
@@ -76,4 +80,4 @@ async function logout(callbackUrl: string | null = "/"): Promise<void> {
   });
 }
 
-export { login, signup, logout };
+export { login, logout, signup };

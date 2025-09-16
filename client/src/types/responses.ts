@@ -1,32 +1,28 @@
 import { ErrorCode } from "@/types/errorCodes";
+import { AxiosError, isAxiosError } from "axios";
 
 /**
- * Discriminated type union for an error in an {@link ErrorBody}.
- * type: "http" indicates an {@link HttpError}, while type: "validation" indicates a {@link ValidationError}.
+ * Structure for an error that occurs during the logic of an HTTP request.
+ * One of the unioned types for the {@link ApiAxiosError} interface.
  */
-interface ApiError {
-  type: "http" | "validation";
+interface HttpError {
+  type: "http";
+  code: ErrorCode;
   details: string;
 }
 
 /**
- * Structure for an error that occurs during the logic of an HTTP request.
- * One of the unioned types for the {@link ApiError} interface.
- */
-interface HttpError extends ApiError {
-  type: "http";
-  code: ErrorCode;
-}
-
-/**
  * Structure for an error that occurs during the input validation of an HTTP request.
- * One of the unioned types for the {@link ApiError} interface.
+ * One of the unioned types for the {@link ApiAxiosError} interface.
  */
-interface ValidationError extends ApiError {
+interface ValidationError {
   type: "validation";
   loc: "body" | "cookies" | "headers" | "params" | "query" | "other";
   field: string;
+  details: string;
 }
+
+type ApiErrors = HttpError[] | ValidationError[];
 
 /**
  * Structure for the body of a successful HTTP response from the backend.
@@ -45,7 +41,7 @@ interface SuccessBody<T = unknown> {
  */
 interface ErrorBody {
   status: "error";
-  errors: ApiError[];
+  errors: HttpError[] | ValidationError[];
 }
 
 /**
@@ -74,13 +70,38 @@ function isError<T>(body: ResponseBody<T>): body is ErrorBody {
   return body.status === "error";
 }
 
+type ApiAxiosError = AxiosError<ErrorBody> & { errorBody: ErrorBody };
+
+function isApiAxiosError(error: any): error is ApiAxiosError {
+  return error.errorBody && isAxiosError(error);
+}
+
+function hasHttpErrors(
+  errors: HttpError[] | ValidationError[]
+): errors is HttpError[] {
+  return errors[0].type === "http";
+}
+
+function hasValidationErrors(
+  errors: HttpError[] | ValidationError[]
+): errors is ValidationError[] {
+  return errors.some((e) => e.type === "validation");
+}
+
 export type {
-  SuccessBody,
+  ApiAxiosError,
+  ApiErrors,
   ErrorBody,
-  ResponseBody,
-  ApiError,
   HttpError,
+  ResponseBody,
+  SuccessBody,
   ValidationError,
 };
 
-export { isSuccess, isError };
+export {
+  hasHttpErrors,
+  hasValidationErrors,
+  isApiAxiosError,
+  isError,
+  isSuccess,
+};

@@ -289,7 +289,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/picture`
       );
 
-      expect(response.status).toBe(500); // Missing file causes 500, not 400
+      expectValidationErrors(response, ["file"], "file");
     });
 
     it("should return validation error for file too large", async () => {
@@ -396,7 +396,7 @@ describe("Student Profile Router", () => {
         `/api/student-profiles/${profile.id}/resume`
       );
 
-      expect(response.status).toBe(500); // Missing file causes 500, not 400
+      expectValidationErrors(response, ["file"], "file");
     });
   });
 
