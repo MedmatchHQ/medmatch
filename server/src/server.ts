@@ -11,6 +11,7 @@ import { errorHandler } from "@/utils/errorHandler";
 import { authRouter } from "@/modules/auth/auth.router";
 import { professionalProfileRouter } from "@/modules/professional-profiles/professional-profile.router";
 import { studentProfileRouter } from "@/modules/student-profiles/student-profile.router";
+import { jobPostingRouter } from "@/modules/job-postings/job-posting.router";
 import { loggingMiddleware } from "./utils/logging";
 
 // Express configuration
@@ -57,6 +58,7 @@ app.use("/api/accounts", authRouter);
 app.use("/api/files", fileRouter);
 app.use("/api/student-profiles", studentProfileRouter);
 app.use("/api/professional-profiles", professionalProfileRouter);
+app.use("/api/job-postings", jobPostingRouter);
 
 // Error handler must come last
 app.use(errorHandler);
