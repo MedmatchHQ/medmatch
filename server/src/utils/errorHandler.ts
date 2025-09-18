@@ -81,7 +81,7 @@ function ControllerMethod() {
       next: NextFunction
     ) {
       try {
-        return await originalMethod.call(this, req, res, next);
+        return await originalMethod.call(this, req, res);
       } catch (error) {
         next(error);
       }
